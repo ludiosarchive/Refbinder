@@ -5,6 +5,8 @@ Simple image operations that shouldn't require a big library.
 
 import struct
 
+_postImportVars = vars().keys()
+
 
 class BadImage(Exception):
 	"""
@@ -46,3 +48,7 @@ def isPng(s):
 		raise TypeError("isPng takes a str, not a %r" % (type(s),))
 
 	return s.startswith('\x89\x50\x4E\x47\x0D\x0A\x1A\x0A')
+
+
+from pypycpyo import optimizer
+optimizer.bind_all_many(vars(), _postImportVars)
