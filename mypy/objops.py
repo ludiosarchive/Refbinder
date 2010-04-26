@@ -1,8 +1,10 @@
 """
-Conversion and validation utilities for Python's built-in types. 
+Conversion, validation, and size measurement utilities for Python's
+built-in types.
 """
 
 import re
+from sys import getsizeof
 
 _postImportVars = vars().keys()
 
@@ -104,6 +106,56 @@ def ensureBool(value):
 		return False
 	else:
 		raise ValueError("%r is not bool-equivalent to True or False" % (value,))
+
+
+def totalSizeOf(obj, _alreadySeen=None):
+	"""
+	Get the size of object C{obj} using C{sys.getsizeof} on the object itself
+	and all of its children recursively. If the same object appears more
+	than once inside C{obj}, it is counted only once.
+
+	This only works properly if C{obj} is a str, unicode, list, dict, set,
+	bool, NoneType, int, complex, float, long, or any nested combination
+	of the above. C{obj} is allowed to have circular references.
+
+	This is particularly useful for getting a good estimate of how much
+	memory a JSON-decoded object is using after receiving it.
+
+	Design notes: sys.getsizeof seems to return very accurate numbers,
+	but does not recurse into the object's children. As we recurse into
+	the children, we keep track of objects we've already counted for two
+	reasons:
+		- If we've already counted the object's memory usage, we don't
+		want to count it again.
+		- As a bonus, we handle circular references gracefully.
+
+	This function assumes that containers do not modify their children as
+	they are traversed.
+	"""
+	if _alreadySeen is None:
+		_alreadySeen = set()
+
+	total = getsizeof(obj)
+	_alreadySeen.add(id(obj))
+
+	if isinstance(obj, dict):
+		# Count the memory usage of both the keys and values.
+		for k, v in obj.iteritems():
+			if not id(k) in _alreadySeen:
+				total += totalSizeOf(k, _alreadySeen)
+			if not id(v) in _alreadySeen:
+				total += totalSizeOf(v, _alreadySeen)
+	else:
+		try:
+			iterator = obj.__iter__()
+		except (TypeError, AttributeError):
+			pass
+		else:
+			for item in iterator:
+				if not id(item) in _alreadySeen:
+					total += totalSizeOf(item, _alreadySeen)
+
+	return total
 
 
 from pypycpyo import optimizer

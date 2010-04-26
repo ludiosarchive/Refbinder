@@ -1,5 +1,6 @@
 from twisted.trial import unittest
 
+import sys
 from mypy import objops
 
 
@@ -125,3 +126,67 @@ class TestEnsureBool(unittest.TestCase):
 	def test_ValueError(self):
 		for e in (-0.5, -1.00001, 1.0001, [], {}, set(), float('nan'), float('inf')):
 			self.aR(ValueError, lambda: objops.ensureBool(e))
+
+
+
+class TotalSizeOfTests(unittest.TestCase):
+	"""
+	Tests for L{objops.totalSizeOf}
+	"""
+	def test_childlessObjects(self):
+		"""
+		For objects with no children,
+			objops.totalSizeOf(obj) == sys.getsizeof(obj)
+		"""
+		s = sys.getsizeof
+		self.aE(s([]), objops.totalSizeOf([]))
+		self.aE(s({}), objops.totalSizeOf({}))
+		self.aE(s(1), objops.totalSizeOf(1))
+
+
+	def test_listObjects(self):
+		s = sys.getsizeof
+		self.aE(s([1]) + s(1), objops.totalSizeOf([1]))
+		self.aE(s([1,1,1,1]) + s(1), objops.totalSizeOf([1,1,1,1]))
+
+
+	def test_dictObjects(self):
+		s = sys.getsizeof
+
+		self.aE(
+			s({"a": "bee"}) + s("a") + s("bee"),
+			objops.totalSizeOf({"a": "bee"}))
+
+		self.aE(
+			s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s([None, None]),
+			objops.totalSizeOf({"a": "bee", "2": ["bee", "a"]}))
+
+		# A tuple as a dict key to make sure the implementation doesn't
+		# just call sys.getsizeof on the key.
+		self.aE(
+			s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s((None, None)),
+			objops.totalSizeOf({"bee": "a", ("bee", "a"): "2"}))
+
+
+	def test_circularList(self):
+		s = sys.getsizeof
+
+		c = []
+		c.append(c)
+
+		n = []
+		n.append(None)
+
+		self.aE(s(n), objops.totalSizeOf(c))
+
+
+	def test_circularDict(self):
+		s = sys.getsizeof
+
+		c = {}
+		c['key'] = c
+
+		n = {}
+		n['key'] = None
+
+		self.aE(s(n) + s('key'), objops.totalSizeOf(c))
