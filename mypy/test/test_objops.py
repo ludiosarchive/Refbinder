@@ -4,7 +4,7 @@ import sys
 from mypy import objops
 
 
-class TestStrToNonNeg(unittest.TestCase):
+class StrToNonNegTests(unittest.TestCase):
 
 	def test_strToNonNeg_okay(self):
 		self.assertEqual(0, objops.strToNonNeg("0"))
@@ -46,7 +46,7 @@ class TestStrToNonNeg(unittest.TestCase):
 
 
 
-class TestEnsureInt(unittest.TestCase):
+class EnsureIntTests(unittest.TestCase):
 
 	def test_ensureInt(self):
 		self.assertIdentical(0, objops.ensureInt(0))
@@ -67,7 +67,7 @@ class TestEnsureInt(unittest.TestCase):
 
 
 
-class TestEnsureNonNegInt(unittest.TestCase):
+class EnsureNonNegIntTests(unittest.TestCase):
 
 	function = lambda _ignoredSelf, x: objops.ensureNonNegInt(x)
 
@@ -97,7 +97,7 @@ class TestEnsureNonNegInt(unittest.TestCase):
 
 
 
-class TestEnsureNonNegIntLimit(unittest.TestCase):
+class EnsureNonNegIntLimitTests(unittest.TestCase):
 
 	function = lambda _ignoredSelf, x: objops.ensureNonNegIntLimit(x, 2**31-1)
 
@@ -111,7 +111,7 @@ class TestEnsureNonNegIntLimit(unittest.TestCase):
 
 
 
-class TestEnsureBool(unittest.TestCase):
+class EnsureBoolTests(unittest.TestCase):
 
 	def test_True(self):
 		for t in (1, 1.0, True):
