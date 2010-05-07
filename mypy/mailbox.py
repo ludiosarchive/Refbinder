@@ -58,10 +58,30 @@ class Mailbox(object):
 
 
 
+# In case you have trouble understanding the _spin above, an almost-correct
+# version of it looks like this:
+#
+#	def _spin(self):
+#		assert not self._spinning, self._spinning
+#		self._spinning = True
+#		try:
+#			while self._pending:
+#				callable, args, kwargs = self._pending.popleft()
+#				callable(*args, **kwargs)
+#		finally:
+#			self._spinning = False
+#			self._stoppedSpinningCb()
+#
+# This simplified version does not properly recover if a callable or if the
+# _stoppedSpinningCb raises an exception. Also, if the _stoppedSpinningCb
+# calls addMail, this version will increase its stack depth as it spins again.
+
+
+
 def mailboxify(mailboxAttr):
 	"""
-	`mailboxify` a method on a class. L{mailboxAttr} is the attribute
-	name for the mailbox to use.
+	A decorator to `mailboxify` a method on a class. L{mailboxAttr} is the
+	attribute name for the mailbox to use.
 
 	Sample use:
 
