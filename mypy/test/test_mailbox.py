@@ -84,8 +84,8 @@ class MailboxTests(unittest.TestCase):
 			'MyError',
 		], log)
 
-		# Spin the mailbox again by adding an item, make sure
-		# b is never called.
+		# Spin the mailbox again by adding an item; make sure
+		# b is not called.
 
 		del log[:]
 		m.addMail(c)
@@ -95,8 +95,42 @@ class MailboxTests(unittest.TestCase):
 			('stoppedSpinning', (), {}),
 		], log)
 
-	# TODO: make it possible for the stoppedSpinningCb to addMail
-	# and continue the spin. Add a test for this.
+
+	def test_stoppedSpinningCbAddsMail(self):
+		"""
+		If the stoppedSpinning callback calls addMail, the Mailbox resumes
+		spinning, and at the same stack depth.
+		"""
+		log = []
+
+		count = [0]
+		def stoppedSpinning(*args, **kwargs):
+			log.append(('stoppedSpinning', args, kwargs, getStackDepth()))
+			if count[0] == 0:
+				count[0] += 1
+				m.addMail(b)
+
+		def a(*args, **kwargs):
+			log.append(('a', args, kwargs, getStackDepth()))
+
+		def b(*args, **kwargs):
+			log.append(('b', args, kwargs, getStackDepth()))
+
+		m = mailbox.Mailbox(stoppedSpinning)
+		m.addMail(a)
+
+		filteredLog = list(entry[0:3] for entry in log) # Don't include stack depths
+
+		self.assertEqual([
+			('a', (), {}),
+			('stoppedSpinning', (), {}),
+			('b', (), {}),
+			('stoppedSpinning', (), {}),
+		], filteredLog)
+
+		stackDepths = list(entry[3] for entry in log)
+		if not iterops.areAllEqual(stackDepths):
+			self.fail("stack depths should have been all equal, were %r" % (stackDepths,))
 
 
 # TODO

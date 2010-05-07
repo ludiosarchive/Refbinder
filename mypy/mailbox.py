@@ -33,17 +33,20 @@ class Mailbox(object):
 	def _spin(self):
 		assert not self._spinning, self._spinning
 		self._spinning = True
-		try:
-			while self._pending:
-				callable, args, kwargs = self._pending.popleft()
-				callable(*args, **kwargs)
-		except:
-			self._pending.clear()
-			raise
-		finally:
-			self._spinning = False
-			# TODO: maybe pass in the error, or a `hadError` boolean?
-			self._stoppedSpinningCb()
+		while self._spinning:
+			try:
+				while self._pending:
+					callable, args, kwargs = self._pending.popleft()
+					callable(*args, **kwargs)
+			except:
+				self._pending.clear()
+				raise
+			finally:
+				# TODO: maybe pass in the error, or a `hadError` boolean?
+				self._stoppedSpinningCb()
+				# Remember, the stoppedSpinning callback may call addMail
+				if not self._pending:
+					self._spinning = False
 
 
 	def addMail(self, callable, *args, **kwargs):
