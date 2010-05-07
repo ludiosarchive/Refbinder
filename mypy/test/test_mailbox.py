@@ -12,6 +12,11 @@ def getStackDepth():
 	return len(traceback.extract_stack()) - 1
 
 
+class MyError(Exception):
+	pass
+
+
+
 class MailboxTests(unittest.TestCase):
 	"""
 	Tests for L{mailbox.Mailbox}.
@@ -45,12 +50,53 @@ class MailboxTests(unittest.TestCase):
 			self.fail("stack depths should have been all equal, were %r" % (stackDepths,))
 
 
-	def test_stoppedSpinningAlwaysCalled(self):
+	def test_callableRaisesException(self):
 		"""
-		The stoppedSpinning callback is called even if a callable raised
-		an exception.
+		If a callable raises an exception, the mailbox is emptied,
+		the stoppedSpinning callable is called anyway, and then
+		the exception is re-raised.
 		"""
+		log = []
 
+		def stoppedSpinning(*args, **kwargs):
+			log.append(('stoppedSpinning', args, kwargs))
+
+		def a(*args, **kwargs):
+			log.append(('a', args, kwargs))
+			m.addMail(b)
+			raise MyError("Just for test_callableRaisesException")
+
+		def b(*args, **kwargs):
+			log.append(('b', args, kwargs))
+
+		def c(*args, **kwargs):
+			log.append(('c', args, kwargs))
+
+		m = mailbox.Mailbox(stoppedSpinning)
+		try:
+			m.addMail(a)
+		except Exception, e:
+			log.append(e.__class__.__name__)
+
+		self.assertEqual([
+			('a', (), {}),
+			('stoppedSpinning', (), {}),
+			'MyError',
+		], log)
+
+		# Spin the mailbox again by adding an item, make sure
+		# b is never called.
+
+		del log[:]
+		m.addMail(c)
+
+		self.assertEqual([
+			('c', (), {}),
+			('stoppedSpinning', (), {}),
+		], log)
+
+	# TODO: make it possible for the stoppedSpinningCb to addMail
+	# and continue the spin. Add a test for this.
 
 
 # TODO

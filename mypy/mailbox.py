@@ -37,6 +37,9 @@ class Mailbox(object):
 			while self._pending:
 				callable, args, kwargs = self._pending.popleft()
 				callable(*args, **kwargs)
+		except:
+			self._pending.clear()
+			raise
 		finally:
 			self._spinning = False
 			# TODO: maybe pass in the error, or a `hadError` boolean?
