@@ -4,6 +4,9 @@ Operations on iterables.
 
 from mypy import constant
 
+_postImportVars = vars().keys()
+
+
 PLACEHOLDER = constant.Constant("PLACEHOLDER")
 
 
@@ -21,3 +24,7 @@ def areAllEqual(iterable):
 			return False
 		last = i
 	return True
+
+
+from pypycpyo import optimizer
+optimizer.bind_all_many(vars(), _postImportVars)
