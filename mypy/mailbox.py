@@ -1,6 +1,8 @@
 import functools
 from collections import deque
 
+_postImportVars = vars().keys()
+
 
 class Mailbox(object):
 	"""
@@ -80,3 +82,7 @@ def mailboxify(mailboxAttr):
 		return newmethod
 
 	return wrapper
+
+
+from pypycpyo import optimizer
+optimizer.bind_all_many(vars(), _postImportVars)
