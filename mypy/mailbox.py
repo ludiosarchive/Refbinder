@@ -12,11 +12,9 @@ class Mailbox(object):
 	reentrantly calling each other, and allows you to do something
 	when the mailbox is empty (for example, write buffered data to a socket).
 
-	This may be useful if you have an object A which both:
-		1) calls something, which in return methods on A
-		2) is called without calling anything first
-
-	See Minerva for sample use of this.
+	This may be useful to use on a class A if it has methods which
+	calls something, which in return calls methods on A. See Minerva
+	for an example of this.
 	"""
 	__slots__ = ('_stoppedSpinningCb', '_spinning', '_pending')
 
