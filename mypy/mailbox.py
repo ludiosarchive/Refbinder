@@ -42,11 +42,13 @@ class Mailbox(object):
 				self._pending.clear()
 				raise
 			finally:
-				# TODO: maybe pass in the error, or a `hadError` boolean?
-				self._stoppedSpinningCb()
-				# Remember, the stoppedSpinning callback may call addMail
-				if not self._pending:
-					self._spinning = False
+				try:
+					# TODO: maybe pass in the error, or a `hadError` boolean?
+					self._stoppedSpinningCb()
+				finally:
+					# Remember, the stoppedSpinning callback may call addMail
+					if not self._pending:
+						self._spinning = False
 
 
 	def addMail(self, callable, *args, **kwargs):

@@ -133,15 +133,62 @@ class MailboxTests(unittest.TestCase):
 			self.fail("stack depths should have been all equal, were %r" % (stackDepths,))
 
 
-# TODO
+	def test_stoppedSpinningCbRaisesException(self):
+		"""
+		If the stoppedSpinning callback raises an exception, it's still
+		possible to spin the mailbox later.
+		"""
+		log = []
 
-#class DemoClass(object):
-#	def __init__(self):
-#		self.log = []
-#
-#
-#	def func(arg1, arg2):
-#		self.log.append((getStackDepth, 'func', arg1, arg2))
-#
-#
-#
+		def stoppedSpinning(*args, **kwargs):
+			log.append(('stoppedSpinning', args, kwargs))
+			raise MyError("Just for test_stoppedSpinningCbRaisesException")
+
+		def a(*args, **kwargs):
+			log.append(('a', args, kwargs))
+
+		m = mailbox.Mailbox(stoppedSpinning)
+
+		for round in range(2):
+			try:
+				m.addMail(a)
+			except Exception, e:
+				log.append(e.__class__.__name__)
+
+			self.assertEqual([
+				('a', (), {}),
+				('stoppedSpinning', (), {}),
+				'MyError',
+			], log, "On round #%d" % (round,))
+
+			del log[:]
+
+
+
+class MailboxifyTests(unittest.TestCase):
+	"""
+	Tests for L{mailbox.mailboxify}.
+	"""
+	def test_mailboxify(self):
+		log = []
+
+		class Something(object):
+			def __init__(self):
+				self._mailbox = mailbox.Mailbox(self._stoppedSpinning)
+
+			def _stoppedSpinning(self):
+				log.append('_stoppedSpinning')
+
+			@mailbox.mailboxify('_mailbox')
+			def doThing(self):
+				log.append('doThing')
+				self.anotherThing()
+
+			@mailbox.mailboxify('_mailbox')
+			def anotherThing(self):
+				log.append('anotherThing')
+
+		something = Something()
+		something.doThing()
+
+		self.assertEqual(['doThing', 'anotherThing', '_stoppedSpinning'], log)
