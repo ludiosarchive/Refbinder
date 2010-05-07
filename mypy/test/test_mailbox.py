@@ -192,3 +192,15 @@ class MailboxifyTests(unittest.TestCase):
 		something.doThing()
 
 		self.assertEqual(['doThing', 'anotherThing', '_stoppedSpinning'], log)
+
+
+	def test_functionNamePreserved(self):
+		"""
+		The function that L{mailbox.mailboxify} returns has the same name
+		as the original function. (It is preserved by functools.wraps)
+		"""
+		def notReallyAMethod(self):
+			pass
+
+		decorated = mailbox.mailboxify('_mailbox')(notReallyAMethod)
+		self.assertEqual('notReallyAMethod', decorated.__name__)
