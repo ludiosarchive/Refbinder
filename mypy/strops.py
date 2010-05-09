@@ -46,6 +46,21 @@ class StringFragment(tuple):
 			self.__class__.__name__, id(self[0]), self[1], self[2])
 
 
+	def __len__(self):
+		# Note: __len__ needs to be implemented for another
+		# reason: so that __getslice__ works properly when sliced
+		# with negative numbers.
+		return self[2]
+
+
+	def __getslice__(self, start, end):
+		##print self, start, end
+		maximumLength = min(self[2] - start, end - start)
+		newStart = self[1] + start
+		##print newStart, maximumLength
+		return StringFragment(self[0], newStart, max(0, maximumLength))
+
+
 	def toBuffer(self):
 		"""
 		Return a C{buffer} object for the fragment. Note that Python
