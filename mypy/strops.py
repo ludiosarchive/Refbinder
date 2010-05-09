@@ -59,6 +59,15 @@ class StringFragment(tuple):
 		return self[0][pos:pos+self[2]]
 
 
+	# We're not equal to constants of another class
+	def __eq__(self, other):
+		return False if type(self) != type(other) else self.toBuffer() == other.toBuffer()
+
+
+	def __ne__(self, other):
+		return True if type(self) != type(other) else self.toBuffer() != other.toBuffer()
+
+
 
 from pypycpyo import optimizer
 optimizer.bind_all_many(vars(), _postImportVars)
