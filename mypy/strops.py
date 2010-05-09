@@ -43,22 +43,22 @@ class StringFragment(tuple):
 
 	def __repr__(self):
 		return '<%s for object at 0x%x, pos=%r, size=%r>' % (
-			self.__class__.__name__, id(self[0]), self[1], self[2])
+			self.__class__.__name__, id(self[FS_STR]), self[FS_POSITION], self[FS_SIZE])
 
 
 	def __len__(self):
 		# Note: __len__ needs to be implemented for another
 		# reason: so that __getslice__ works properly when sliced
 		# with negative numbers.
-		return self[2]
+		return self[FS_SIZE]
 
 
 	def __getslice__(self, start, end):
 		##print self, start, end
-		maximumLength = min(self[2] - start, end - start)
-		newStart = self[1] + start
+		maximumLength = min(self[FS_SIZE] - start, end - start)
+		newStart = self[FS_POSITION] + start
 		##print newStart, maximumLength
-		return StringFragment(self[0], newStart, max(0, maximumLength))
+		return StringFragment(self[FS_STR], newStart, max(0, maximumLength))
 
 
 	def toBuffer(self):
@@ -67,14 +67,14 @@ class StringFragment(tuple):
 		will not collect the underlying string object if there is a buffer
 		of it.
 		"""
-		return buffer(self[0], self[1], self[2])
+		return buffer(self[FS_STR], self[FS_POSITION], self[FS_SIZE])
 
 
 	# TODO: toMemoryview
 
 	def toString(self):
-		pos = self[1]
-		return self[0][pos:pos+self[2]]
+		pos = self[FS_POSITION]
+		return self[FS_STR][pos:pos+self[FS_SIZE]]
 
 
 	# We're not equal to constants of another class
@@ -85,6 +85,12 @@ class StringFragment(tuple):
 	def __ne__(self, other):
 		return True if type(self) != type(other) else self.toBuffer() != other.toBuffer()
 
+
+# These are public, feel free to use them.
+
+FS_STR = 0
+FS_POSITION = 1
+FS_SIZE = 2
 
 
 from pypycpyo import optimizer
