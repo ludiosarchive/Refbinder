@@ -96,8 +96,8 @@ class StringFragmentTests(unittest.TestCase):
 
 
 	def test_sliceNoBeginning(self):
-		f1 = strops.StringFragment("helloworld", 0, 5)
-		self.assertEqual("hell", f1[:4].toString())
+		f1 = strops.StringFragment("helloworld", 1, 6)
+		self.assertEqual("ello", f1[:4].toString())
 		self.assertEqual(4, len(f1[:4]))
 
 
