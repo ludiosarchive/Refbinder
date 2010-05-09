@@ -26,6 +26,9 @@ class StringFragment(tuple):
 	"""
 	Represents a fragment of a string. Used to avoid copying, especially in
 	network protocols.
+
+	Equal to other L{StringFragment}s that represent the same string
+	fragment.
 	"""
 	__slots__ = ()
 
