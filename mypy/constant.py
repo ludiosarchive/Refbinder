@@ -31,6 +31,9 @@ class BaseConstant(tuple):
 
 
 
+BC_VALUE = 0
+
+
 class Constant(BaseConstant):
 	"""
 	Represents a string constant. Immutable.
