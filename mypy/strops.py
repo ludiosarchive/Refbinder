@@ -61,7 +61,9 @@ class StringFragment(tuple):
 		return StringFragment(self[FS_STR], newStart, max(0, maximumLength))
 
 
-	def toBuffer(self):
+	# TODO: toMemoryview # Python does not provide a __memoryview__
+
+	def toBuffer(self): # Python does not provide a __buffer__
 		"""
 		Return a C{buffer} object for the fragment. Note that Python
 		will not collect the underlying string object if there is a buffer
@@ -70,9 +72,7 @@ class StringFragment(tuple):
 		return buffer(self[FS_STR], self[FS_POSITION], self[FS_SIZE])
 
 
-	# TODO: toMemoryview
-
-	def toString(self):
+	def __str__(self):
 		pos = self[FS_POSITION]
 		return self[FS_STR][pos:pos+self[FS_SIZE]]
 
