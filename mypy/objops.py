@@ -4,6 +4,7 @@ built-in types.
 """
 
 import re
+from math import log10
 from sys import getsizeof
 
 _postImportVars = vars().keys()
@@ -14,6 +15,7 @@ for num in xrange(10000):
 	_quickConvert_strToPosInt[str(num)] = num
 
 _OKAY_NUMBER = re.compile(r'^[1-9]\d*$')
+
 def strToNonNeg(value):
 	"""
 	A very strict numeric-string to non-zero integer converter.
@@ -22,14 +24,47 @@ def strToNonNeg(value):
 
 	We don't use Python's int() because it allows a lot of things,
 	including int('-0') and int(' -0').
-	"""
 
+	Raises C{ValueError} if negative.
+	"""
 	# TODO: This (probably) makes things faster, but we need a benchmark to know for sure.
 	quick = _quickConvert_strToPosInt.get(value)
 	if quick is not None:
 		return quick
 	if _OKAY_NUMBER.match(value):
 		return int(value)
+
+	raise ValueError("could not decode to non-negative integer: %r" % (value,))
+
+
+def strToNonNegLimit(value, limit):
+	"""
+	Like L{strToNonNeg}, except with a numerical limit C{limit}.
+
+	Raises C{ValueError} if too high (or negative).
+	"""
+	num = _quickConvert_strToPosInt.get(value)
+	if num is not None:
+		if num > limit:
+			raise ValueError("too high")
+		return num
+
+	# Optimizations for the common case
+	if limit == 2**64:
+		declenlimit = 20
+	elif limit == 2**32:
+		declenlimit = 10
+	else:
+		declenlimit = int(log10(limit) + 1)
+
+	if len(value) > declenlimit:
+		raise ValueError("too high")
+
+	if _OKAY_NUMBER.match(value):
+		num = int(value)
+		if num > limit:
+			raise ValueError("too high")
+		return num
 
 	raise ValueError("could not decode to non-negative integer: %r" % (value,))
 

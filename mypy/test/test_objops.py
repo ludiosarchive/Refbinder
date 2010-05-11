@@ -6,43 +6,76 @@ from mypy import objops
 
 class StrToNonNegTests(unittest.TestCase):
 
+	def _call(self, s):
+		return objops.strToNonNeg(s)
+
+
 	def test_strToNonNeg_okay(self):
-		self.assertEqual(0, objops.strToNonNeg("0"))
-		self.assertEqual(3, objops.strToNonNeg("3"))
-		self.assertEqual(12390, objops.strToNonNeg("12390"))
+		self.assertEqual(0, self._call("0"))
+		self.assertEqual(3, self._call("3"))
+		self.assertEqual(12390, self._call("12390"))
 
 		# Unicode is valid, too
-		self.assertEqual(0, objops.strToNonNeg(u"0"))
-		self.assertEqual(12390, objops.strToNonNeg(u"12390"))
+		self.assertEqual(0, self._call(u"0"))
+		self.assertEqual(12390, self._call(u"12390"))
 
 
 	def test_strToNonNeg_TypeErrors(self):
-		self.assertRaises(TypeError, lambda: objops.strToNonNeg(None))
-		self.assertRaises(TypeError, lambda: objops.strToNonNeg([]))
-		self.assertRaises(TypeError, lambda: objops.strToNonNeg({}))
+		self.assertRaises(TypeError, lambda: self._call(None))
+		self.assertRaises(TypeError, lambda: self._call([]))
+		self.assertRaises(TypeError, lambda: self._call({}))
 
 
 	def test_strToNonNeg_ValueErrors(self):
 		# Empty str is invalid
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg(""))
+		self.assertRaises(ValueError, lambda: self._call(""))
 
 		# Anything with a leading zero is invalid
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("07"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("08"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("09"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("007"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("0007"))
+		self.assertRaises(ValueError, lambda: self._call("07"))
+		self.assertRaises(ValueError, lambda: self._call("08"))
+		self.assertRaises(ValueError, lambda: self._call("09"))
+		self.assertRaises(ValueError, lambda: self._call("007"))
+		self.assertRaises(ValueError, lambda: self._call("0007"))
 
 		# Anything with non-digit character is invalid
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("-7"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("7e4"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("7.0"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("7."))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("0.0"))
+		self.assertRaises(ValueError, lambda: self._call("-7"))
+		self.assertRaises(ValueError, lambda: self._call("7e4"))
+		self.assertRaises(ValueError, lambda: self._call("7.0"))
+		self.assertRaises(ValueError, lambda: self._call("7."))
+		self.assertRaises(ValueError, lambda: self._call("0.0"))
 
 		# Hex is rejected
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("7f"))
-		self.assertRaises(ValueError, lambda: objops.strToNonNeg("f7"))
+		self.assertRaises(ValueError, lambda: self._call("7f"))
+		self.assertRaises(ValueError, lambda: self._call("f7"))
+
+
+
+class StrToNonNegLimitTests(StrToNonNegTests):
+
+	def _call(self, s, limit=2**128):
+		return objops.strToNonNegLimit(s, limit)
+
+
+	def test_withinLimit(self):
+		self.assertEqual(0, self._call("0", 0))
+		self.assertEqual(1, self._call("1", 1))
+		self.assertEqual(9, self._call("9", 9))
+		self.assertEqual(9, self._call("9", 10))
+		self.assertEqual(2**32, self._call(str(2**32), 2**32))
+		self.assertEqual(2**64, self._call(str(2**64), 2**64))
+		self.assertEqual(2**65, self._call(str(2**65), 2**65))
+
+
+	def test_outsideLimit(self):
+		# exercise the first `num > limit:` case
+		self.assertRaises(ValueError, lambda: self._call("1", 0))
+		self.assertRaises(ValueError, lambda: self._call("9", 8))
+		# exercise the `if len(value) > declenlimit:` case
+		self.assertRaises(ValueError, lambda: self._call("999999999999999999999", 8))
+		# exercise the last `num > limit:` case
+		self.assertRaises(ValueError, lambda: self._call(str(2**32 + 1), 2**32))
+		self.assertRaises(ValueError, lambda: self._call(str(2**64 + 1), 2**64))
+		self.assertRaises(ValueError, lambda: self._call(str(2**65 + 1), 2**65))
 
 
 
