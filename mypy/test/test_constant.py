@@ -1,7 +1,7 @@
 from twisted.trial import unittest
 
 from mypy.constant import (
-	BaseConstant, Constant, GenericIdentifier, InvalidIdentifier, BC_VALUE)
+	BaseConstant, Constant, GenericIdentifier, InvalidIdentifier)
 
 
 class AnyConstant(BaseConstant):
@@ -67,7 +67,7 @@ class BaseConstantTests(unittest.TestCase):
 
 	def test_reachValue(self):
 		s1 = AnyConstant('z')
-		self.assertEqual('z', s1[BC_VALUE])
+		self.assertEqual('z', s1.value)
 
 		self.assertRaises((TypeError, AttributeError), lambda: s1.notAnAttr)
 
