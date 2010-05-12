@@ -22,47 +22,60 @@ def rreplace(string, needle, replacement):
 
 
 
-class StringFragment(tuple):
+class StringFragment(object):
 	"""
 	Represents a fragment of a string. Used to avoid copying, especially in
 	network protocols.
 
-	You can slice a L{StringFragment}, but you cannot index it. (Indexes
-	are reserved for grabbing
+	DO NOT adjust the attributes of the object after you instantiate it; this
+	is faux-immutable.
 
-	Equal to other L{StringFragment}s that represent the same string
-	fragment. Not necessarily hash-equivalent to such L{StringFragment}s,
-	though.
+	You can slice a L{StringFragment}, which will return a new
+	L{StringFragment}. You can index it, which will return a 1-byte C{str}.
+
+	Equal and hash-equivalent to other L{StringFragment}s that represent
+	the same string fragment.
 	"""
-	__slots__ = ()
+	__slots__ = ('string', 'pos', 'size')
 
-	def __new__(cls, string, pos, size):
-		"""
-		C{string} is a C{str} object.
-		C{pos} is the position the fragment starts at.
-		C{size} is the size of the fragment.
-		"""
-		return tuple.__new__(cls, (string, pos, size))
+	def __init__(self, string, pos, size):
+		self.string = string
+		self.pos = pos
+		self.size = size
 
 
 	def __repr__(self):
 		return '<%s for object at 0x%x, pos=%r, size=%r>' % (
-			self.__class__.__name__, id(self[FS_STR]), self[FS_POSITION], self[FS_SIZE])
+			self.__class__.__name__, id(self.string), self.pos, self.size)
 
 
 	def __len__(self):
 		# Note: __len__ needs to be implemented for another
 		# reason: so that __getslice__ works properly when sliced
 		# with negative numbers.
-		return self[FS_SIZE]
+		return self.size
+
+
+	def __getitem__(self, num):
+		pos = self.pos
+		size = self.size
+		rightLimit = pos + size - 1
+
+		if num < 0:
+			num = size + num
+		num = pos + num
+		if not pos <= num <= rightLimit:
+			raise IndexError("StringFragment index out of range")
+
+		return self.string[num]
 
 
 	def __getslice__(self, start, end):
 		##print self, start, end
-		maximumLength = min(self[FS_SIZE] - start, end - start)
-		newStart = self[FS_POSITION] + start
+		maximumLength = min(self.size - start, end - start)
+		newStart = self.pos + start
 		##print newStart, maximumLength
-		return StringFragment(self[FS_STR], newStart, max(0, maximumLength))
+		return StringFragment(self.string, newStart, max(0, maximumLength))
 
 
 	# TODO: toMemoryview # Python does not provide a __memoryview__
@@ -73,12 +86,16 @@ class StringFragment(tuple):
 		will not collect the underlying string object if there is a buffer
 		of it.
 		"""
-		return buffer(self[FS_STR], self[FS_POSITION], self[FS_SIZE])
+		return buffer(self.string, self.pos, self.size)
 
 
 	def __str__(self):
-		pos = self[FS_POSITION]
-		return self[FS_STR][pos:pos+self[FS_SIZE]]
+		pos = self.pos
+		return self.string[pos:pos+self.size]
+
+
+	def __hash__(self):
+		return hash(self.toBuffer())
 
 
 	# We're not equal to constants of another class
@@ -89,12 +106,6 @@ class StringFragment(tuple):
 	def __ne__(self, other):
 		return True if type(self) != type(other) else self.toBuffer() != other.toBuffer()
 
-
-# These are public, feel free to use them.
-
-FS_STR = 0
-FS_POSITION = 1
-FS_SIZE = 2
 
 
 from pypycpyo import optimizer

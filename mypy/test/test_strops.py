@@ -18,6 +18,13 @@ class StringFragmentTests(unittest.TestCase):
 	"""
 	Tests for L{strops.StringFragment}
 	"""
+	def test_publicAttrs(self):
+		f = strops.StringFragment("helloworld", 1, 10)
+		self.assertEqual("helloworld", f.string)
+		self.assertEqual(1, f.pos)
+		self.assertEqual(10, f.size)
+
+
 	def test_stringFragmentFull(self):
 		f = strops.StringFragment("helloworld", 0, 10)
 		self.assertEqual("helloworld", str(f))
@@ -44,9 +51,7 @@ class StringFragmentTests(unittest.TestCase):
 		f2 = strops.StringFragment(h, 5, 5)
 		self.assertTrue(f1 == f2)
 		self.assertFalse(f1 != f2)
-
-		# But doesn't hash to the same number...
-		self.assertNotEqual(hash(f1), hash(f2))
+		self.assertEqual(hash(f1), hash(f2))
 
 
 	def test_eqSameSlice(self):
@@ -55,8 +60,21 @@ class StringFragmentTests(unittest.TestCase):
 		f2 = strops.StringFragment(h, 0, 5)
 		self.assertTrue(f1 == f2)
 		self.assertFalse(f1 != f2)
+		self.assertEqual(hash(f1), hash(f2))
 
-		# And hashes to the same number...
+
+	def test_differentUnderlyingStringsSameHash(self):
+		"""
+		hash()es to the same hash even if the underlying string
+		objects are not the same object.
+		"""
+		s1 = "x" * 1024
+		s2 = "x" * 1024
+		f1 = strops.StringFragment(s1, 0, 5)
+		f2 = strops.StringFragment(s2, 0, 5)
+
+		self.assertTrue(f1 == f2)
+		self.assertFalse(f1 != f2)
 		self.assertEqual(hash(f1), hash(f2))
 
 
@@ -75,6 +93,27 @@ class StringFragmentTests(unittest.TestCase):
 		f1 = strops.StringFragment(h, 0, 5)
 		self.assertFalse(f1 == (h, 0, 5))
 		self.assertTrue(f1 != (h, 0, 5))
+
+
+	def test_getItem(self):
+		f1 = strops.StringFragment("helloworld", 1, 5)
+		self.assertEqual("e", f1[0])
+		self.assertEqual("o", f1[3])
+		self.assertEqual("w", f1[-1])
+		self.assertEqual("o", f1[-2])
+		self.assertEqual("e", f1[-5])
+
+		self.assertRaises(IndexError, lambda: f1[5])
+		self.assertRaises(IndexError, lambda: f1[-6])
+
+
+	def test_getItemForShortFragment(self):
+		f1 = strops.StringFragment("helloworld", 9, 1)
+		self.assertEqual("d", f1[0])
+		self.assertEqual("d", f1[-1])
+
+		self.assertRaises(IndexError, lambda: f1[1])
+		self.assertRaises(IndexError, lambda: f1[-2])
 
 
 	def test_slice(self):
