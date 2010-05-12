@@ -27,8 +27,12 @@ class StringFragment(tuple):
 	Represents a fragment of a string. Used to avoid copying, especially in
 	network protocols.
 
+	You can slice a L{StringFragment}, but you cannot index it. (Indexes
+	are reserved for grabbing
+
 	Equal to other L{StringFragment}s that represent the same string
-	fragment.
+	fragment. Not necessarily hash-equivalent to such L{StringFragment}s,
+	though.
 	"""
 	__slots__ = ()
 
