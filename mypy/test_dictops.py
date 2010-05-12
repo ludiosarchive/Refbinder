@@ -34,6 +34,15 @@ class FrozenDictTests(unittest.TestCase):
 		self.assertNotEqual(frozendict(x=3), frozendict(x=4))
 
 
+	def test_equalityForUnhashable(self):
+		"""
+		If the frozendict is not hashable, equality still works properly.
+		"""
+		self.assertEqual(frozendict(x=[]), frozendict(x=[]))
+		self.assertEqual(frozendict(x=[3]), frozendict(x=[3]))
+		self.assertNotEqual(frozendict(x=[3]), frozendict(x=[4]))
+
+
 	def test_immutable(self):
 		def delete(obj, key):
 			del obj[key]
