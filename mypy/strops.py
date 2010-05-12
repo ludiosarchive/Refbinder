@@ -57,6 +57,9 @@ class StringFragment(object):
 
 
 	def __getitem__(self, num):
+		# Unlike for __getslice__, Python passes through negative numbers
+		# to __getitem__.
+
 		pos = self.pos
 		size = self.size
 		rightLimit = pos + size - 1
