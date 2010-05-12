@@ -1,46 +1,53 @@
 from twisted.trial import unittest
 
-from mypy.dictops import frozendict
+from mypy.dictops import consensualfrozendict, frozendict
 
 
-class FrozenDictTests(unittest.TestCase):
+class _BaseFrozenDictTests(object):
+
+	dtype = consensualfrozendict
 
 	def test_hashable(self):
-		d = frozendict(x=3, y=(), z="string")
+		d = self.dtype(x=3, y=(), z="string")
 		self.assertTrue(isinstance(hash(d), int))
 		# exercise _cachedHash
 		self.assertTrue(isinstance(hash(d), int))
 
 
 	def test_notHashable(self):
-		d = frozendict(x=[])
+		d = self.dtype(x=[])
 		# exceptions.TypeError: unhashable type: 'list'
 		self.assertRaises(TypeError, lambda: hash(d))
 
 
 	def test_repr(self):
-		d = frozendict(x=3)
-		self.assertEqual("frozendict({'x': 3})", repr(d))
+		d = self.dtype(x=3)
+		self.assertEqual(self.dtype.__name__ + "({'x': 3})", repr(d))
+
+
+	def test_repr2(self):
+		d = self.dtype(x=[{}])
+		self.assertEqual(self.dtype.__name__ + "({'x': [{}]})", repr(d))
 
 
 	def test_reprEmpty(self):
-		d = frozendict()
-		self.assertEqual("frozendict({})", repr(d))
+		d = self.dtype()
+		self.assertEqual(self.dtype.__name__ + "({})", repr(d))
 
 
 	def test_equality(self):
-		self.assertEqual(frozendict(), frozendict())
-		self.assertEqual(frozendict(x=3), frozendict(x=3))
-		self.assertNotEqual(frozendict(x=3), frozendict(x=4))
+		self.assertEqual(self.dtype(), self.dtype())
+		self.assertEqual(self.dtype(x=3), self.dtype(x=3))
+		self.assertNotEqual(self.dtype(x=3), self.dtype(x=4))
 
 
 	def test_equalityForUnhashable(self):
 		"""
 		If the frozendict is not hashable, equality still works properly.
 		"""
-		self.assertEqual(frozendict(x=[]), frozendict(x=[]))
-		self.assertEqual(frozendict(x=[3]), frozendict(x=[3]))
-		self.assertNotEqual(frozendict(x=[3]), frozendict(x=[4]))
+		self.assertEqual(self.dtype(x=[]), self.dtype(x=[]))
+		self.assertEqual(self.dtype(x=[3]), self.dtype(x=[3]))
+		self.assertNotEqual(self.dtype(x=[3]), self.dtype(x=[4]))
 
 
 	def test_immutable(self):
@@ -50,7 +57,7 @@ class FrozenDictTests(unittest.TestCase):
 		def set(obj, key, value):
 			obj[key] = value
 
-		d = frozendict(x=3)
+		d = self.dtype(x=3)
 		self.assertRaises(AttributeError, lambda: d.pop())
 		self.assertRaises(AttributeError, lambda: d.popitem())
 		self.assertRaises(AttributeError, lambda: d.clear())
@@ -59,6 +66,9 @@ class FrozenDictTests(unittest.TestCase):
 		self.assertRaises(AttributeError, lambda: d.setdefault("x", "y"))
 		self.assertRaises(AttributeError, lambda: d.update({"x": 4}))
 
+
+
+class ConsensualFrozenDictTests(_BaseFrozenDictTests, unittest.TestCase):
 
 	def test_callingInitDoesNotUpdate(self):
 		"""
@@ -77,6 +87,79 @@ class FrozenDictTests(unittest.TestCase):
 
 		Make sure that __init__ can't mutate the dict, though.
 		"""
-		d = frozendict(x=3)
+		d = self.dtype(x=3)
 		d.__init__({"x": 4})
 		self.assertEqual(3, d['x'])
+
+
+	def test_notReallyImmutable(self):
+		"""
+		Unfortunately, dict.__init__ (and other dict methods) can be used
+		to update the frozendict.
+		"""
+		d = self.dtype(x=3)
+		dict.__init__(d, {'x': 4})
+		self.assertEqual(4, d['x'])
+
+
+
+class _DictReadingTests(object):
+	dtype = frozendict
+
+	def test_len(self):
+		self.assertEqual(0, len(self.dtype()))
+		self.assertEqual(1, len(self.dtype(x=3)))
+
+
+	def test_contains(self):
+		d = self.dtype(x=3)
+		self.assertTrue('x' in d)
+		self.assertFalse('y' in d)
+		self.assertFalse(3 in d)
+		self.assertFalse(('x', 3) in d)
+
+
+	def test_keys(self):
+		self.assertEqual(['x'], self.dtype(x=3).keys())
+		self.assertEqual([], self.dtype().keys())
+
+
+	def test_values(self):
+		self.assertEqual([3], self.dtype(x=3).values())
+		self.assertEqual([], self.dtype().values())
+
+
+	def test_items(self):
+		self.assertEqual([('x', 3)], self.dtype(x=3).items())
+		self.assertEqual([], self.dtype().items())
+
+
+	def test_iteration(self):
+		d = self.dtype(x=3)
+		found = []
+		for k in d:
+			found.append(k)
+		self.assertEqual(['x'], found)
+
+# TODO: complete tests
+
+
+
+class FrozenDictTests(_DictReadingTests, _BaseFrozenDictTests, unittest.TestCase):
+	"""
+	Tests for L{dictops.frozendict}
+	"""
+	dtype = frozendict
+
+	def test_copy(self):
+		d = self.dtype(x=3)
+		# .copy() returns a reference to the same object
+		self.assertIdentical(d, d.copy())
+
+
+
+class DictSanityCheckTests(_DictReadingTests, unittest.TestCase):
+	"""
+	Test that L{_DictReadingTests} works the same on python dicts.
+	"""
+	dtype = dict
