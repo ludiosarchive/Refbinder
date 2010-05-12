@@ -45,6 +45,9 @@ class StringFragmentTests(unittest.TestCase):
 		self.assertTrue(f1 == f2)
 		self.assertFalse(f1 != f2)
 
+		# But doesn't hash to the same number...
+		self.assertNotEqual(hash(f1), hash(f2))
+
 
 	def test_eqSameSlice(self):
 		h = "hellohello"
@@ -52,6 +55,9 @@ class StringFragmentTests(unittest.TestCase):
 		f2 = strops.StringFragment(h, 0, 5)
 		self.assertTrue(f1 == f2)
 		self.assertFalse(f1 != f2)
+
+		# And hashes to the same number...
+		self.assertEqual(hash(f1), hash(f2))
 
 
 	def test_neqInsideSameString(self):
