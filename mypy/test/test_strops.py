@@ -41,8 +41,8 @@ class StringFragmentTests(unittest.TestCase):
 
 	def test_repr(self):
 		f = strops.StringFragment("helloworld", 1, 4)
-		self.assertTrue(repr(f).startswith("<StringFragment for object at 0x"), f)
-		self.assertTrue(repr(f).endswith(", pos=1, size=4>"), f)
+		self.assertTrue(repr(f).startswith("<StringFragment for 0x"), repr(f))
+		self.assertTrue(repr(f).endswith(", pos=1, size=4, represents 'ello'>"), repr(f))
 
 
 	def test_eqInsideSameString(self):

@@ -45,8 +45,8 @@ class StringFragment(object):
 
 
 	def __repr__(self):
-		return '<%s for object at 0x%x, pos=%r, size=%r>' % (
-			self.__class__.__name__, id(self.string), self.pos, self.size)
+		return '<%s for 0x%x, pos=%r, size=%r, represents %r>' % (
+			self.__class__.__name__, id(self.string), self.pos, self.size, str(self))
 
 
 	def __len__(self):
