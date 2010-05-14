@@ -20,8 +20,6 @@ class StringFragmentTests(unittest.TestCase):
 	"""
 	def test_publicAttrs(self):
 		f = strops.StringFragment("helloworld", 1, 10)
-		self.assertEqual("helloworld", f.string)
-		self.assertEqual(1, f.pos)
 		self.assertEqual(10, f.size)
 
 

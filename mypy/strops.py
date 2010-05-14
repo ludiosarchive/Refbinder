@@ -36,17 +36,17 @@ class StringFragment(object):
 	Equal and hash-equivalent to other L{StringFragment}s that represent
 	the same string fragment.
 	"""
-	__slots__ = ('string', 'pos', 'size')
+	__slots__ = ('_string', '_pos', 'size')
 
 	def __init__(self, string, pos, size):
-		self.string = string
-		self.pos = pos
+		self._string = string
+		self._pos = pos
 		self.size = size
 
 
 	def __repr__(self):
 		return '<%s for 0x%x, pos=%r, size=%r, represents %r>' % (
-			self.__class__.__name__, id(self.string), self.pos, self.size, str(self))
+			self.__class__.__name__, id(self._string), self._pos, self.size, str(self))
 
 
 	def __len__(self):
@@ -60,7 +60,7 @@ class StringFragment(object):
 		# Unlike for __getslice__, Python passes through negative numbers
 		# to __getitem__.
 
-		pos = self.pos
+		pos = self._pos
 		size = self.size
 		rightLimit = pos + size - 1
 
@@ -70,15 +70,15 @@ class StringFragment(object):
 		if not pos <= num <= rightLimit:
 			raise IndexError("StringFragment index out of range")
 
-		return self.string[num]
+		return self._string[num]
 
 
 	def __getslice__(self, start, end):
 		##print self, start, end
 		maximumLength = min(self.size - start, end - start)
-		newStart = self.pos + start
+		newStart = self._pos + start
 		##print newStart, maximumLength
-		return StringFragment(self.string, newStart, max(0, maximumLength))
+		return StringFragment(self._string, newStart, max(0, maximumLength))
 
 
 	# TODO: toMemoryview # Python does not provide a __memoryview__
@@ -89,12 +89,12 @@ class StringFragment(object):
 		will not collect the underlying string object if there is a buffer
 		of it.
 		"""
-		return buffer(self.string, self.pos, self.size)
+		return buffer(self._string, self._pos, self.size)
 
 
 	def __str__(self):
-		pos = self.pos
-		return self.string[pos:pos+self.size]
+		pos = self._pos
+		return self._string[pos:pos+self.size]
 
 
 	def __hash__(self):
