@@ -62,7 +62,7 @@ class StrToNonNegLimitTests(StrToNonNegTests):
 		self.assertEqual(9, self._call("9", 9))
 		self.assertEqual(9, self._call("9", 10))
 		self.assertEqual(2**32, self._call(str(2**32), 2**32))
-		self.assertEqual(2**64, self._call(str(2**64), 2**64))
+		self.assertEqual(2**53, self._call(str(2**53), 2**53))
 		self.assertEqual(2**65, self._call(str(2**65), 2**65))
 
 
@@ -73,8 +73,8 @@ class StrToNonNegLimitTests(StrToNonNegTests):
 		# exercise the `if len(value) > declenlimit:` case
 		self.assertRaises(ValueError, lambda: self._call("999999999999999999999", 8))
 		# exercise the last `num > limit:` case
-		self.assertRaises(ValueError, lambda: self._call(str(2**32 + 1), 2**32))
-		self.assertRaises(ValueError, lambda: self._call(str(2**64 + 1), 2**64))
+		self.assertRaises(ValueError, lambda: self._call(str(2**31), 2**31 - 1))
+		self.assertRaises(ValueError, lambda: self._call(str(2**53 + 1), 2**53))
 		self.assertRaises(ValueError, lambda: self._call(str(2**65 + 1), 2**65))
 
 

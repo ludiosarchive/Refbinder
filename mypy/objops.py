@@ -50,9 +50,9 @@ def strToNonNegLimit(value, limit):
 		return num
 
 	# Optimizations for the common case
-	if limit == 2**64:
-		declenlimit = 20
-	elif limit == 2**32:
+	if limit == 2**53:
+		declenlimit = 16
+	elif limit == 2**31 - 1:
 		declenlimit = 10
 	else:
 		declenlimit = int(log10(limit) + 1)
