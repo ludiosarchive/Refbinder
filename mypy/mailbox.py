@@ -16,9 +16,9 @@ class Mailbox(object):
 	calls something, which in return calls methods on A. See Minerva
 	for an example of this.
 	"""
-	__slots__ = ('_stoppedSpinningCb', '_spinning', '_pending')
+	__slots__ = ('_stoppedSpinningCb', '_spinning', '_pending', '_noisy')
 
-	def __init__(self, stoppedSpinningCb):
+	def __init__(self, stoppedSpinningCb, noisy=False):
 		"""
 		L{stoppedSpinningCb} is a callable which will be called every time
 			Mailbox stops spinning.
@@ -26,15 +26,20 @@ class Mailbox(object):
 		self._stoppedSpinningCb = stoppedSpinningCb
 		self._spinning = False
 		self._pending = deque()
+		self._noisy = noisy
 
 
 	def _spin(self):
 		assert not self._spinning, self._spinning
+		if self._noisy:
+			print "Mailbox: starting spin"
 		self._spinning = True
 		while self._spinning:
 			try:
 				while self._pending:
 					callable, args, kwargs = self._pending.popleft()
+					if self._noisy:
+						print "Mailbox: calling", callable, args, kwargs
 					callable(*args, **kwargs)
 			except:
 				self._pending.clear()
@@ -42,14 +47,20 @@ class Mailbox(object):
 			finally:
 				try:
 					# TODO: maybe pass in the error, or a `hadError` boolean?
+					if self._noisy:
+						print "Mailbox: calling", self._stoppedSpinningCb
 					self._stoppedSpinningCb()
 				finally:
 					# Remember, the stoppedSpinning callback may call addMail
 					if not self._pending:
 						self._spinning = False
+		if self._noisy:
+			print "Mailbox: ending spin"
 
 
 	def addMail(self, callable, *args, **kwargs):
+		if self._noisy:
+			print "Mailbox: addMail", callable, args, kwargs
 		self._pending.append((callable, args, kwargs))
 		if not self._spinning:
 			self._spin()
