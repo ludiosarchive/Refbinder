@@ -10,11 +10,9 @@ from sys import getsizeof
 _postImportVars = vars().keys()
 
 
-_quickConvert_strToPosInt = {}
-for num in xrange(10000):
-	_quickConvert_strToPosInt[str(num)] = num
-
-_OKAY_NUMBER = re.compile(r'^[1-9]\d*$')
+# Neither of these accept "-0"
+_OKAY_NONNEG_INT = re.compile(r'^(0|[1-9]\d*)$')
+_OKAY_INT = re.compile(r'^(0|\-?[1-9]\d*)$')
 
 def strToNonNeg(value):
 	"""
@@ -27,11 +25,7 @@ def strToNonNeg(value):
 
 	Raises C{ValueError} if negative.
 	"""
-	# TODO: This (probably) makes things faster, but we need a benchmark to know for sure.
-	quick = _quickConvert_strToPosInt.get(value)
-	if quick is not None:
-		return quick
-	if _OKAY_NUMBER.match(value):
+	if _OKAY_NONNEG_INT.match(value):
 		return int(value)
 
 	raise ValueError("could not decode to non-negative integer: %r" % (value,))
@@ -43,30 +37,44 @@ def strToNonNegLimit(value, limit):
 
 	Raises C{ValueError} if too high (or negative).
 	"""
-	num = _quickConvert_strToPosInt.get(value)
-	if num is not None:
-		if num > limit:
-			raise ValueError("too high")
-		return num
-
 	# Optimizations for the common case
 	if limit == 2**53:
 		declenlimit = 16
 	elif limit == 2**31 - 1:
 		declenlimit = 10
 	else:
-		declenlimit = int(log10(limit) + 1)
+		declenlimit = int(log10(limit) + 1) if limit != 0 else 1
 
 	if len(value) > declenlimit:
 		raise ValueError("too high")
 
-	if _OKAY_NUMBER.match(value):
+	if _OKAY_NONNEG_INT.match(value):
 		num = int(value)
 		if num > limit:
 			raise ValueError("too high")
 		return num
 
 	raise ValueError("could not decode to non-negative integer: %r" % (value,))
+
+
+def strToIntInRange(value, lower, upper):
+	"""
+	A very strict numeric-string to integer converter.
+
+	@rtype: L{int} or L{long}
+	@return: C{value} as converted from a str to an int/long.
+
+	Raises C{ValueError} if too high or too low.
+	"""
+	if _OKAY_INT.match(value):
+		num = int(value)
+	else:
+		raise ValueError("value %r does not look numeric" % (value,))
+
+	if not lower <= num <= upper:
+		raise ValueError("value %r not in range [%r, %r]" % (value, lower, upper))
+
+	return num
 
 
 def ensureInt(value):
