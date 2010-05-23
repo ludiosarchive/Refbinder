@@ -79,6 +79,37 @@ class StrToNonNegLimitTests(StrToNonNegTests):
 
 
 
+class StrToIntInRangeTests(unittest.TestCase):
+
+	def test_strToIntInRange_withinLimit(self):
+		self.assertEqual(3, objops.strToIntInRange("3", 3, 3))
+		self.assertEqual(3, objops.strToIntInRange("3", -3, 3))
+		self.assertEqual(-3, objops.strToIntInRange("-3", -3, 3))
+		self.assertEqual(0, objops.strToIntInRange("0", 0, 0))
+
+
+	def test_strToIntInRange_outsideLimit(self):
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("-4", -3, 3))
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("4", -3, 3))
+
+
+	def test_strToIntInRange_badNumbers(self):
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("1.", -3, 3))
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("1.0", -3, 3))
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("1.5", -3, 3))
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("-0", -3, 3))
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("", -3, 3))
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("x", -3, 3))
+		self.assertRaises(ValueError, lambda: objops.strToIntInRange("-", -3, 3))
+
+
+	def test_strToIntInRange_TypeErrors(self):
+		self.assertRaises(TypeError, lambda: objops.strToIntInRange(None))
+		self.assertRaises(TypeError, lambda: objops.strToIntInRange([]))
+		self.assertRaises(TypeError, lambda: objops.strToIntInRange({}))
+
+
+
 class EnsureIntTests(unittest.TestCase):
 
 	def test_ensureInt(self):
