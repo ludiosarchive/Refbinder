@@ -1,4 +1,4 @@
-from twisted.trial import unittest
+import unittest
 from twisted.python.filepath import FilePath
 
 from mypy import imgops

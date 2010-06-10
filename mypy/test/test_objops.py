@@ -1,4 +1,4 @@
-from twisted.trial import unittest
+import unittest
 
 import sys
 from mypy import objops
@@ -113,11 +113,11 @@ class StrToIntInRangeTests(unittest.TestCase):
 class EnsureIntTests(unittest.TestCase):
 
 	def test_ensureInt(self):
-		self.assertIdentical(0, objops.ensureInt(0))
-		self.assertIdentical(-1, objops.ensureInt(-1))
-		self.assertIdentical(-1, objops.ensureInt(-1.0))
-		self.assertIdentical(0, objops.ensureInt(-0.0))
-		self.assertIdentical(2, objops.ensureInt(2.0))
+		self.assertIs(0, objops.ensureInt(0))
+		self.assertIs(-1, objops.ensureInt(-1))
+		self.assertIs(-1, objops.ensureInt(-1.0))
+		self.assertIs(0, objops.ensureInt(-0.0))
+		self.assertIs(2, objops.ensureInt(2.0))
 		self.assertEqual(200000000000000000000000000, objops.ensureInt(200000000000000000000000000))
 
 
@@ -136,10 +136,10 @@ class EnsureNonNegIntTests(unittest.TestCase):
 	function = lambda _ignoredSelf, x: objops.ensureNonNegInt(x)
 
 	def test_ensureNonNegInt(self):
-		self.assertIdentical(0, self.function(0))
-		self.assertIdentical(0, self.function(-0))
-		self.assertIdentical(0, self.function(-0.0))
-		self.assertIdentical(2, self.function(2.0))
+		self.assertIs(0, self.function(0))
+		self.assertIs(0, self.function(-0))
+		self.assertIs(0, self.function(-0.0))
+		self.assertIs(2, self.function(2.0))
 
 
 	def test_ensureNonNegIntExceptions(self):

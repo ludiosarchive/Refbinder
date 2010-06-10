@@ -1,5 +1,5 @@
 import traceback
-from twisted.trial import unittest
+import unittest
 
 from mypy import mailbox
 from mypy import iterops
