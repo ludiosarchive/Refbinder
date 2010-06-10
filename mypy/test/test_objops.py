@@ -179,17 +179,17 @@ class EnsureBoolTests(unittest.TestCase):
 
 	def test_True(self):
 		for t in (1, 1.0, True):
-			self.aE(True, objops.ensureBool(t))
+			self.assertEqual(True, objops.ensureBool(t))
 
 
 	def test_False(self):
 		for f in (0, 0.0, -0, -0.0, False):
-			self.aE(False, objops.ensureBool(f))
+			self.assertEqual(False, objops.ensureBool(f))
 
 
 	def test_ValueError(self):
 		for e in (-0.5, -1.00001, 1.0001, [], {}, set(), float('nan'), float('inf')):
-			self.aR(ValueError, lambda: objops.ensureBool(e))
+			self.assertRaises(ValueError, lambda: objops.ensureBool(e))
 
 
 
@@ -203,31 +203,31 @@ class TotalSizeOfTests(unittest.TestCase):
 			objops.totalSizeOf(obj) == sys.getsizeof(obj)
 		"""
 		s = sys.getsizeof
-		self.aE(s([]), objops.totalSizeOf([]))
-		self.aE(s({}), objops.totalSizeOf({}))
-		self.aE(s(1), objops.totalSizeOf(1))
+		self.assertEqual(s([]), objops.totalSizeOf([]))
+		self.assertEqual(s({}), objops.totalSizeOf({}))
+		self.assertEqual(s(1), objops.totalSizeOf(1))
 
 
 	def test_listObjects(self):
 		s = sys.getsizeof
-		self.aE(s([1]) + s(1), objops.totalSizeOf([1]))
-		self.aE(s([1,1,1,1]) + s(1), objops.totalSizeOf([1,1,1,1]))
+		self.assertEqual(s([1]) + s(1), objops.totalSizeOf([1]))
+		self.assertEqual(s([1,1,1,1]) + s(1), objops.totalSizeOf([1,1,1,1]))
 
 
 	def test_dictObjects(self):
 		s = sys.getsizeof
 
-		self.aE(
+		self.assertEqual(
 			s({"a": "bee"}) + s("a") + s("bee"),
 			objops.totalSizeOf({"a": "bee"}))
 
-		self.aE(
+		self.assertEqual(
 			s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s([None, None]),
 			objops.totalSizeOf({"a": "bee", "2": ["bee", "a"]}))
 
 		# A tuple as a dict key to make sure the implementation doesn't
 		# just call sys.getsizeof on the key.
-		self.aE(
+		self.assertEqual(
 			s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s((None, None)),
 			objops.totalSizeOf({"bee": "a", ("bee", "a"): "2"}))
 
@@ -241,7 +241,7 @@ class TotalSizeOfTests(unittest.TestCase):
 		n = []
 		n.append(None)
 
-		self.aE(s(n), objops.totalSizeOf(c))
+		self.assertEqual(s(n), objops.totalSizeOf(c))
 
 
 	def test_circularDict(self):
@@ -253,4 +253,4 @@ class TotalSizeOfTests(unittest.TestCase):
 		n = {}
 		n['key'] = None
 
-		self.aE(s(n) + s('key'), objops.totalSizeOf(c))
+		self.assertEqual(s(n) + s('key'), objops.totalSizeOf(c))
