@@ -1,3 +1,13 @@
+"""
+You should not use Mailbox because it makes things more confusing.
+It looks like it will solve some problem, and it does, but the program
+becomes harder to reason about. Instead of using this, just stick to
+thinking about all of the possible re-entrancies.
+
+To see a program that used Mailbox, see Minerva's newlink.py
+from 2010-05-04 to 2010-06-29. Before and after these dates,
+it does not use Mailbox.
+"""
 import functools
 from collections import deque
 
