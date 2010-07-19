@@ -183,7 +183,7 @@ class EnsureBoolTests(unittest.TestCase):
 
 
 	def test_False(self):
-		for f in (0, 0.0, -0, -0.0, False):
+		for f in (0, 0.0, -0.0, False):
 			self.assertEqual(False, objops.ensureBool(f))
 
 

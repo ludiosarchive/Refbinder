@@ -133,8 +133,8 @@ def ensureNonNegIntLimit(value, limit):
 
 def ensureBool(value):
 	"""
-	Convert 1.0, 1, and True to True.
-	Convert 0.0, 0, -0.0, -0, and False to False.
+	Convert 1, 1.0, and True to True.
+	Convert 0, 0.0, -0.0, and False to False.
 	For all other values, raise L{ValueError}.
 
 	@rtype: L{bool}
