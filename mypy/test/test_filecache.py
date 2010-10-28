@@ -23,23 +23,23 @@ class FileCacheTests(unittest.TestCase):
 			return filename
 
 		fc = filecache.FileCache(lambda: clock.rightNow, 1.0, makeFingerprint, getContent)
-		self.assertEqual('hello world', fc.getContent('hello world'))
+		self.assertEqual(('hello world', True), fc.getContent('hello world'))
 		self.assertEqual([1, 1], counts)
 
 		# Advance the clock by less than 1.0s and make sure that not even
 		# makeFingerprint is called next time.
 		clock.advance(0.1)
-		self.assertEqual('hello world', fc.getContent('hello world'))
+		self.assertEqual(('hello world', False), fc.getContent('hello world'))
 		self.assertEqual([1, 1], counts)
 
 		# Clear the cache and make sure both makeFingerprint and getContent are called.
 		fc.clearCache()
-		self.assertEqual('hello world', fc.getContent('hello world'))
+		self.assertEqual(('hello world', True), fc.getContent('hello world'))
 		self.assertEqual([2, 2], counts)
 
 		# Advance the clock by 1.0s; make sure makeFingerprint is called
 		clock.advance(1.0)
-		self.assertEqual('hello world', fc.getContent('hello world'))
+		self.assertEqual(('hello world', False), fc.getContent('hello world'))
 		# The fingerprint was the same, so getContent should not have been called.
 		self.assertEqual([3, 2], counts)
 
@@ -47,7 +47,7 @@ class FileCacheTests(unittest.TestCase):
 		# both makeFingerprint and getContent were called.
 		fingerprint[0] = ('two',)
 		clock.advance(1.0)
-		self.assertEqual('hello world', fc.getContent('hello world'))
+		self.assertEqual(('hello world', True), fc.getContent('hello world'))
 		# The fingerprint was different, so getContent should have been called.
 		self.assertEqual([4, 3], counts)
 
@@ -57,11 +57,11 @@ class FileCacheTests(unittest.TestCase):
 		fc = filecache.FileCache(lambda: clock.rightNow, 0.01)
 		filename = self.mktemp()
 		FilePath(filename).setContent('aaaa')
-		self.assertEqual('aaaa', fc.getContent(filename))
+		self.assertEqual(('aaaa', True), fc.getContent(filename))
 		FilePath(filename).setContent('bbbbb')
-		self.assertEqual('aaaa', fc.getContent(filename))
+		self.assertEqual(('aaaa', False), fc.getContent(filename))
 		clock.advance(0.01)
-		self.assertEqual('bbbbb', fc.getContent(filename))
+		self.assertEqual(('bbbbb', True), fc.getContent(filename))
 
 		# Reading a file that doesn't exist raises an OSError or IOError
 		self.assertRaises((OSError, IOError),
@@ -73,7 +73,7 @@ class FileCacheTests(unittest.TestCase):
 		fc = filecache.FileCache(lambda: clock.rightNow, -1)
 		filename = self.mktemp()
 		FilePath(filename).setContent('aaaa')
-		self.assertEqual('aaaa', fc.getContent(filename))
+		self.assertEqual(('aaaa', True), fc.getContent(filename))
 		FilePath(filename).setContent('bbbbb')
 		clock.advance(3600)
-		self.assertEqual('aaaa', fc.getContent(filename))
+		self.assertEqual(('aaaa', False), fc.getContent(filename))

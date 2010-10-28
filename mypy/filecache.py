@@ -80,28 +80,29 @@ class FileCache(object):
 		"""
 		C{filename} is a C{str} representing a file name.
 
-		Returns a C{str} or raises an exception.
+		Returns (content, maybeNew) as (C{str}, C{bool}), or raises an
+		exception.
 		"""
 		cachedFile = self._cache.get(filename)
 		if cachedFile:
 			if self._recheckDelay == -1:
-				return cachedFile.content
+				return cachedFile.content, False
 
 			timeNow = self._getTimeCallable()
 			if cachedFile.checkedAt > timeNow - self._recheckDelay:
-				return cachedFile.content
+				return cachedFile.content, False
 
 			fingerprint = self._fingerprintCallable(filename)
 			if fingerprint == cachedFile.fingerprint:
 				cachedFile.checkedAt = timeNow
-				return cachedFile.content
+				return cachedFile.content, False
 		else:
 			timeNow = self._getTimeCallable()
 			fingerprint = self._fingerprintCallable(filename)
 
 		content = self._getContentCallable(filename)
 		self._cache[filename] = _CachedFile(timeNow, fingerprint, content)
-		return content
+		return content, True
 
 
 from pypycpyo import optimizer
