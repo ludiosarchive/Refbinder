@@ -4,12 +4,12 @@ _postImportVars = vars().keys()
 
 
 class _CachedFile(object):
-	__slots__ = ('checkedAt', 'fingerprint', 'contents')
+	__slots__ = ('checkedAt', 'fingerprint', 'content')
 
-	def __init__(self, checkedAt, fingerprint, contents):
+	def __init__(self, checkedAt, fingerprint, content):
 		self.checkedAt = checkedAt
 		self.fingerprint = fingerprint
-		self.contents = contents
+		self.content = content
 
 
 
@@ -18,7 +18,7 @@ def defaultFingerprint(filename):
 	return s.st_ino, s.st_size, s.st_mtime, s.st_ctime
 
 
-def defaultGetContents(filename):
+def defaultGetContent(filename):
 	f = None
 	try:
 		f = open(filename, 'rb')
@@ -42,11 +42,12 @@ class FileCache(object):
 		calling it.
 	"""
 
-	__slots__ = ('_getTimeCallable', '_recheckDelay', '_cache')
+	__slots__ = ('_getTimeCallable', '_recheckDelay', '_fingerprintCallable',
+		'_getContentCallable', '_cache')
 
 	def __init__(self, getTimeCallable, recheckDelay,
 	fingerprintCallable=defaultFingerprint,
-	getContentsCallable=defaultGetContents):
+	getContentCallable=defaultGetContent):
 		"""
 		C{getTimeCallable} is a 0-arg callable that returns the current
 			time as a C{float|int|long} in seconds.  This can be any
@@ -59,13 +60,17 @@ class FileCache(object):
 		C{fingerprintCallable} is a callable that takes a filename and
 			returns an __eq__able object.
 
-		C{getContentsCallable} is a callable that takes a filename and
-			returns the contents of the file as a C{str}.
+		C{getContentCallable} is a callable that takes a filename and
+			returns the content of the file as a C{str}.
 		"""
 		self._getTimeCallable = getTimeCallable
 		self._recheckDelay = recheckDelay
 		self._fingerprintCallable = fingerprintCallable
-		self._getContentsCallable = getContentsCallable
+		self._getContentCallable = getContentCallable
+		self.clearCache()
+
+
+	def clearCache(self):
 		# TODO: use securedict
 		self._cache = {}
 
@@ -80,16 +85,17 @@ class FileCache(object):
 		cachedFile = self._cache.get(filename)
 		if cachedFile:
 			if cachedFile.checkedAt > timeNow - self._recheckDelay:
-				return cachedFile.contents
+				return cachedFile.content
 
 			fingerprint = self._fingerprintCallable(filename)
 			if fingerprint == cachedFile.fingerprint:
 				cachedFile.checkedAt = timeNow
-				return cachedFile.contents
+				return cachedFile.content
 
 		fingerprint = self._fingerprintCallable(filename)
-		contents = self._getContentsCallable(filename)
-		self._cache[filename] = _CachedFile(timeNow, fingerprint, contents)
+		content = self._getContentCallable(filename)
+		self._cache[filename] = _CachedFile(timeNow, fingerprint, content)
+		return content
 
 
 from pypycpyo import optimizer
