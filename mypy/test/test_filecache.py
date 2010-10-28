@@ -62,3 +62,7 @@ class FileCacheTests(unittest.TestCase):
 		self.assertEqual('aaaa', fc.getContent(filename))
 		clock.advance(0.01)
 		self.assertEqual('bbbbb', fc.getContent(filename))
+
+		# Reading a file that doesn't exist raises an OSError or IOError
+		self.assertRaises((OSError, IOError),
+			lambda: fc.getContent('does_not_exist'))
