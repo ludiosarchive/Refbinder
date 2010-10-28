@@ -32,13 +32,13 @@ class FileCache(object):
 	"""
 	Generic file cache.  Notes about its behavior:
 
-	-	if it's been more than N seconds since the file was last stat,
+	-	If it's been more than N seconds since the file was last stat,
 		it peforms a stat, and if (mod time, creat time, inode, size) are
 		different from last time, re-reads the file.
 
-	-	it never forgets files.
+	-	It never forgets files.
 
-	-	it never automatically updates the cache when you're not
+	-	It never automatically updates the cache when you're not
 		calling it.
 	"""
 
@@ -47,6 +47,21 @@ class FileCache(object):
 	def __init__(self, getTimeCallable, recheckDelay,
 	fingerprintCallable=defaultFingerprint,
 	getContentsCallable=defaultGetContents):
+		"""
+		C{getTimeCallable} is a 0-arg callable that returns the current
+			time as a C{float|int|long} in seconds.  This can be any
+			clock, as long as it increments by 1 every second.
+
+		C{recheckDelay} is a C{float|int|long}.  If file hasn't been
+			stat'ed in this many seconds, it will be stat'ed (at the
+			next L{getContent} call).
+
+		C{fingerprintCallable} is a callable that takes a filename and
+			returns an __eq__able object.
+
+		C{getContentsCallable} is a callable that takes a filename and
+			returns the contents of the file as a C{str}.
+		"""
 		self._getTimeCallable = getTimeCallable
 		self._recheckDelay = recheckDelay
 		self._fingerprintCallable = fingerprintCallable
@@ -56,6 +71,11 @@ class FileCache(object):
 
 
 	def getContent(self, filename):
+		"""
+		C{filename} is a C{str} representing a file name.
+
+		Returns a C{str} or raises an exception.
+		"""
 		timeNow = self._getTimeCallable()
 		cachedFile = self._cache.get(filename)
 		if cachedFile:
