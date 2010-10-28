@@ -1,5 +1,6 @@
 from twisted.trial import unittest
 from twisted.internet.task import Clock
+from twisted.python.filepath import FilePath
 
 from mypy import filecache
 
@@ -49,3 +50,15 @@ class FileCacheTests(unittest.TestCase):
 		self.assertEqual('hello world', fc.getContent('hello world'))
 		# The fingerprint was different, so getContent should have been called.
 		self.assertEqual([4, 3], counts)
+
+
+	def test_fileCacheWithDefaults(self):
+		clock = Clock()
+		fc = filecache.FileCache(lambda: clock.rightNow, 0.01)
+		filename = self.mktemp()
+		FilePath(filename).setContent('aaaa')
+		self.assertEqual('aaaa', fc.getContent(filename))
+		FilePath(filename).setContent('bbbbb')
+		self.assertEqual('aaaa', fc.getContent(filename))
+		clock.advance(0.01)
+		self.assertEqual('bbbbb', fc.getContent(filename))
