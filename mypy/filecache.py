@@ -55,7 +55,8 @@ class FileCache(object):
 
 		C{recheckDelay} is a C{float|int|long}.  If file hasn't been
 			stat'ed in this many seconds, it will be stat'ed (at the
-			next L{getContent} call).
+			next L{getContent} call).  If == to C{-1}, files are never
+			stat'ed or read more than once.
 
 		C{fingerprintCallable} is a callable that takes a filename and
 			returns an __eq__able object.
@@ -81,9 +82,12 @@ class FileCache(object):
 
 		Returns a C{str} or raises an exception.
 		"""
-		timeNow = self._getTimeCallable()
 		cachedFile = self._cache.get(filename)
 		if cachedFile:
+			if self._recheckDelay == -1:
+				return cachedFile.content
+
+			timeNow = self._getTimeCallable()
 			if cachedFile.checkedAt > timeNow - self._recheckDelay:
 				return cachedFile.content
 
@@ -92,6 +96,7 @@ class FileCache(object):
 				cachedFile.checkedAt = timeNow
 				return cachedFile.content
 		else:
+			timeNow = self._getTimeCallable()
 			fingerprint = self._fingerprintCallable(filename)
 
 		content = self._getContentCallable(filename)

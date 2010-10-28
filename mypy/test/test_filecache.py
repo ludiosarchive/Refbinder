@@ -7,7 +7,7 @@ from mypy import filecache
 
 class FileCacheTests(unittest.TestCase):
 
-	def test_fileCacheWorks(self):
+	def test_functionality(self):
 		clock = Clock()
 
 		fingerprint = [('one',)]
@@ -52,7 +52,7 @@ class FileCacheTests(unittest.TestCase):
 		self.assertEqual([4, 3], counts)
 
 
-	def test_fileCacheWithDefaults(self):
+	def test_withDefaults(self):
 		clock = Clock()
 		fc = filecache.FileCache(lambda: clock.rightNow, 0.01)
 		filename = self.mktemp()
@@ -66,3 +66,14 @@ class FileCacheTests(unittest.TestCase):
 		# Reading a file that doesn't exist raises an OSError or IOError
 		self.assertRaises((OSError, IOError),
 			lambda: fc.getContent('does_not_exist'))
+
+
+	def test_neverRecheck(self):
+		clock = Clock()
+		fc = filecache.FileCache(lambda: clock.rightNow, -1)
+		filename = self.mktemp()
+		FilePath(filename).setContent('aaaa')
+		self.assertEqual('aaaa', fc.getContent(filename))
+		FilePath(filename).setContent('bbbbb')
+		clock.advance(3600)
+		self.assertEqual('aaaa', fc.getContent(filename))
