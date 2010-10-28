@@ -91,8 +91,9 @@ class FileCache(object):
 			if fingerprint == cachedFile.fingerprint:
 				cachedFile.checkedAt = timeNow
 				return cachedFile.content
+		else:
+			fingerprint = self._fingerprintCallable(filename)
 
-		fingerprint = self._fingerprintCallable(filename)
 		content = self._getContentCallable(filename)
 		self._cache[filename] = _CachedFile(timeNow, fingerprint, content)
 		return content
