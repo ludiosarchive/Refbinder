@@ -2,14 +2,20 @@ class ReallyEqualMixin(object):
 
 	def assertReallyEqual(self, a, b):
 		self.assertTrue(a == b)
+		self.assertTrue(b == a)
 		self.assertFalse(a != b)
+		self.assertFalse(b != a)
 		self.assertEqual(0, cmp(a, b))
+		self.assertEqual(0, cmp(b, a))
 
 
 	def assertReallyNotEqual(self, a, b):
 		self.assertFalse(a == b)
+		self.assertFalse(b == a)
 		self.assertTrue(a != b)
+		self.assertTrue(b != a)
 		self.assertNotEqual(0, cmp(a, b))
+		self.assertNotEqual(0, cmp(b, a))
 
 
 
