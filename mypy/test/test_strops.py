@@ -1,5 +1,6 @@
 import unittest
 
+from mypy.testhelpers import ReallyEqualMixin
 from mypy import strops
 
 
@@ -14,7 +15,7 @@ class RreplaceTests(unittest.TestCase):
 
 
 
-class StringFragmentTests(unittest.TestCase):
+class StringFragmentTests(unittest.TestCase, ReallyEqualMixin):
 	"""
 	Tests for L{strops.StringFragment}
 	"""
@@ -47,8 +48,7 @@ class StringFragmentTests(unittest.TestCase):
 		h = "hellohello"
 		f1 = strops.StringFragment(h, 0, 5)
 		f2 = strops.StringFragment(h, 5, 5)
-		self.assertTrue(f1 == f2)
-		self.assertFalse(f1 != f2)
+		self.assertReallyEqual(f1, f2)
 		self.assertEqual(hash(f1), hash(f2))
 
 
@@ -56,8 +56,7 @@ class StringFragmentTests(unittest.TestCase):
 		h = "hellohello"
 		f1 = strops.StringFragment(h, 0, 5)
 		f2 = strops.StringFragment(h, 0, 5)
-		self.assertTrue(f1 == f2)
-		self.assertFalse(f1 != f2)
+		self.assertReallyEqual(f1, f2)
 		self.assertEqual(hash(f1), hash(f2))
 
 
@@ -71,8 +70,7 @@ class StringFragmentTests(unittest.TestCase):
 		f1 = strops.StringFragment(s1, 0, 5)
 		f2 = strops.StringFragment(s2, 0, 5)
 
-		self.assertTrue(f1 == f2)
-		self.assertFalse(f1 != f2)
+		self.assertReallyEqual(f1, f2)
 		self.assertEqual(hash(f1), hash(f2))
 
 
@@ -80,8 +78,7 @@ class StringFragmentTests(unittest.TestCase):
 		h = "hellohello"
 		f1 = strops.StringFragment(h, 1, 5)
 		f2 = strops.StringFragment(h, 2, 5)
-		self.assertFalse(f1 == f2)
-		self.assertTrue(f1 != f2)
+		self.assertReallyNotEqual(f1, f2)
 
 
 	def test_neqToTuple(self):
@@ -89,8 +86,7 @@ class StringFragmentTests(unittest.TestCase):
 		# of StringFragment; remember to update this test if it changes.
 		h = "hellohello"
 		f1 = strops.StringFragment(h, 0, 5)
-		self.assertFalse(f1 == (h, 0, 5))
-		self.assertTrue(f1 != (h, 0, 5))
+		self.assertReallyNotEqual(f1, (h, 0, 5))
 
 
 	def test_getItem(self):

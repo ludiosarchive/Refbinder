@@ -101,7 +101,6 @@ class StringFragment(object):
 		return hash(self.toBuffer())
 
 
-	# We're not equal to constants of another class
 	def __eq__(self, other):
 		return False if type(self) != type(other) else self.toBuffer() == other.toBuffer()
 
