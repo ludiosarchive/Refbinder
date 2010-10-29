@@ -1,6 +1,10 @@
 class ReallyEqualMixin(object):
 
 	def assertReallyEqual(self, a, b):
+		# assertEqual first, because it will have a good message if the
+		# assertion fails.
+		self.assertEqual(a, b)
+		self.assertEqual(b, a)
 		self.assertTrue(a == b)
 		self.assertTrue(b == a)
 		self.assertFalse(a != b)
@@ -10,6 +14,10 @@ class ReallyEqualMixin(object):
 
 
 	def assertReallyNotEqual(self, a, b):
+		# assertNotEqual first, because it will have a good message if the
+		# assertion fails.
+		self.assertNotEqual(a, b)
+		self.assertNotEqual(b, a)
 		self.assertFalse(a == b)
 		self.assertFalse(b == a)
 		self.assertTrue(a != b)
