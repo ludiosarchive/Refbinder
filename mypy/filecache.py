@@ -1,5 +1,7 @@
 import os
 
+from mypy.dictops import securedict
+
 _postImportVars = vars().keys()
 
 
@@ -72,8 +74,7 @@ class FileCache(object):
 
 
 	def clearCache(self):
-		# TODO: use securedict
-		self._cache = {}
+		self._cache = securedict()
 
 
 	def getContent(self, filename):
