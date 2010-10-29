@@ -15,10 +15,10 @@ class ReallyEqualMixin(object):
 
 def todo(reasonOrMethod):
 	"""
-	This is a both a decorator and a decorator-returner, depending on
-	what C{reasonOrMethod} is.
+	Use this decorator to decorate Twisted trial test methods with a
+	C{todo} attribute.
 
-	This allows you to do
+	This allows you to do either
 
 	@todo
 	def test_that_will_fail(self):
@@ -29,6 +29,9 @@ def todo(reasonOrMethod):
 	@todo("some reason or explanation")
 	def test_that_will_fail2(self):
 		...
+
+	(This is a both a decorator and a decorator-returner, depending on
+	what C{reasonOrMethod} is.)
 	"""
 
 	if hasattr(reasonOrMethod, '__call__'):
