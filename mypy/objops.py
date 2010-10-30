@@ -30,7 +30,7 @@ def basicGetSizeOf(obj):
 	elif isinstance(obj, float):
 		return _gcHeaderSize + 8
 	elif isinstance(obj, long):
-		return _gcHeaderSize + ceil(log(obj, 2))
+		return _gcHeaderSize + int(ceil(log(obj, 2)))
 	elif isinstance(obj, (list, tuple)):
 		return _gcHeaderSize + _bytesPerWord + _bytesPerWord * len(obj)
 	elif isinstance(obj, dict):
