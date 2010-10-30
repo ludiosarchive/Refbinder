@@ -8,6 +8,25 @@ except ImportError:
 	getsizeof = objops.basicGetSizeOf
 
 
+class BasicGetSizeOfTests(unittest.TestCase):
+
+	def test_sanity(self):
+		s = objops.basicGetSizeOf
+		self.assertTrue(s("hi") > s("h"))
+		self.assertTrue(s(u"longer") > s(u"short"))
+		self.assertTrue(s(u"hi") > s("hi"))
+		self.assertEqual(s(0), s(1))
+		self.assertEqual(s(0.0), s(435781.345783))
+		self.assertTrue(s(10000000000L) > s(5L))
+		self.assertTrue(s([1]) > s([]))
+		self.assertTrue(s((1,)) > s(()))
+		self.assertTrue(s({1: 2}) > s({}))
+		self.assertTrue(s(set([1])) > s(set()))
+		self.assertTrue(s(frozenset([1])) > s(frozenset()))
+		self.assertEqual(s(None), s(Ellipsis))
+
+
+
 class StrToNonNegTests(unittest.TestCase):
 
 	def _call(self, s):
