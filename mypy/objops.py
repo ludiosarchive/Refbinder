@@ -17,6 +17,10 @@ _UCS4 = sys.maxunicode > 2**16 - 1
 _bytesPerCodePoint = 4 if _UCS4 else 2
 
 def basicGetSizeOf(obj):
+	"""
+	Many of these numbers are guesses.  Don't use this if L{sys.getsizeof}
+	is available.
+	"""
 	if isinstance(obj, str):
 		return _gcHeaderSize + len(obj)
 	elif isinstance(obj, unicode):
@@ -26,8 +30,9 @@ def basicGetSizeOf(obj):
 	elif isinstance(obj, float):
 		return _gcHeaderSize + 8
 	elif isinstance(obj, long):
-		# An estimate, probably on the low side.
 		return _gcHeaderSize + ceil(log(obj, 2))
+	elif isinstance(obj, (list, tuple)):
+		return _gcHeaderSize + _bytesPerWord + _bytesPerWord * len(obj)
 	elif isinstance(obj, dict):
 		return _gcHeaderSize + _bytesPerWord * (750 + 8 * len(obj))
 	elif isinstance(obj, (set, frozenset)):
