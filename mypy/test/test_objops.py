@@ -232,15 +232,19 @@ class TotalSizeOfTests(unittest.TestCase):
 			s({"a": "bee"}) + s("a") + s("bee"),
 			objops.totalSizeOf({"a": "bee"}))
 
-		self.assertEqual(
-			s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s([None, None]),
-			objops.totalSizeOf({"a": "bee", "2": ["bee", "a"]}))
+		# Keep in mind that object-sharing for "a" and "bee" is not
+		# guaranteed, so we can only test for <=
+		sizeComponents = s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s([None, None])
+		sizeObject = objops.totalSizeOf({"a": "bee", "2": ["bee", "a"]})
+		self.assertTrue(sizeComponents <= sizeObject, (sizeComponents, sizeObject))
 
 		# A tuple as a dict key to make sure the implementation doesn't
 		# just call getsizeof on the key.
-		self.assertEqual(
-			s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s((None, None)),
-			objops.totalSizeOf({"bee": "a", ("bee", "a"): "2"}))
+		# Keep in mind that object-sharing for "a" and "bee" is not
+		# guaranteed, so we can only test for <=
+		sizeComponents = s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s((None, None))
+		sizeObject = objops.totalSizeOf({"bee": "a", ("bee", "a"): "2"})
+		self.assertTrue(sizeComponents <= sizeObject, (sizeComponents, sizeObject))
 
 
 	def test_circularList(self):
