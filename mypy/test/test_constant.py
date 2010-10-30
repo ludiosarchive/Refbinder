@@ -1,4 +1,4 @@
-import unittest
+from twisted.trial import unittest
 
 from mypy.constant import (
 	BaseConstant, Constant, GenericIdentifier, InvalidIdentifier)
