@@ -212,8 +212,7 @@ def totalSizeOf(obj, _alreadySeen=None):
 	This function assumes that containers do not modify their children as
 	they are traversed.
 
-	If your Python is < 2.6, the returned size will be less accurate, usually
-	lower than reality.
+	If your Python is < 2.6, the returned size will be less accurate.
 	"""
 	if _alreadySeen is None:
 		_alreadySeen = set()
