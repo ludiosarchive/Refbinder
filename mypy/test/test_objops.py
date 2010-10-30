@@ -1,7 +1,11 @@
-import unittest
+from twisted.trial import unittest
 
-import sys
 from mypy import objops
+
+try:
+	from sys import getsizeof
+except ImportError:
+	getsizeof = objops.basicGetSizeOf
 
 
 class StrToNonNegTests(unittest.TestCase):
@@ -113,11 +117,11 @@ class StrToIntInRangeTests(unittest.TestCase):
 class EnsureIntTests(unittest.TestCase):
 
 	def test_ensureInt(self):
-		self.assertIs(0, objops.ensureInt(0))
-		self.assertIs(-1, objops.ensureInt(-1))
-		self.assertIs(-1, objops.ensureInt(-1.0))
-		self.assertIs(0, objops.ensureInt(-0.0))
-		self.assertIs(2, objops.ensureInt(2.0))
+		self.assertIdentical(0, objops.ensureInt(0))
+		self.assertIdentical(-1, objops.ensureInt(-1))
+		self.assertIdentical(-1, objops.ensureInt(-1.0))
+		self.assertIdentical(0, objops.ensureInt(-0.0))
+		self.assertIdentical(2, objops.ensureInt(2.0))
 		self.assertEqual(200000000000000000000000000, objops.ensureInt(200000000000000000000000000))
 
 
@@ -136,10 +140,10 @@ class EnsureNonNegIntTests(unittest.TestCase):
 	function = lambda _ignoredSelf, x: objops.ensureNonNegInt(x)
 
 	def test_ensureNonNegInt(self):
-		self.assertIs(0, self.function(0))
-		self.assertIs(0, self.function(-0))
-		self.assertIs(0, self.function(-0.0))
-		self.assertIs(2, self.function(2.0))
+		self.assertIdentical(0, self.function(0))
+		self.assertIdentical(0, self.function(-0))
+		self.assertIdentical(0, self.function(-0.0))
+		self.assertIdentical(2, self.function(2.0))
 
 
 	def test_ensureNonNegIntExceptions(self):
@@ -200,22 +204,22 @@ class TotalSizeOfTests(unittest.TestCase):
 	def test_childlessObjects(self):
 		"""
 		For objects with no children,
-			objops.totalSizeOf(obj) == sys.getsizeof(obj)
+			objops.totalSizeOf(obj) == getsizeof(obj)
 		"""
-		s = sys.getsizeof
+		s = getsizeof
 		self.assertEqual(s([]), objops.totalSizeOf([]))
 		self.assertEqual(s({}), objops.totalSizeOf({}))
 		self.assertEqual(s(1), objops.totalSizeOf(1))
 
 
 	def test_listObjects(self):
-		s = sys.getsizeof
+		s = getsizeof
 		self.assertEqual(s([1]) + s(1), objops.totalSizeOf([1]))
 		self.assertEqual(s([1,1,1,1]) + s(1), objops.totalSizeOf([1,1,1,1]))
 
 
 	def test_dictObjects(self):
-		s = sys.getsizeof
+		s = getsizeof
 
 		self.assertEqual(
 			s({"a": "bee"}) + s("a") + s("bee"),
@@ -226,14 +230,14 @@ class TotalSizeOfTests(unittest.TestCase):
 			objops.totalSizeOf({"a": "bee", "2": ["bee", "a"]}))
 
 		# A tuple as a dict key to make sure the implementation doesn't
-		# just call sys.getsizeof on the key.
+		# just call getsizeof on the key.
 		self.assertEqual(
 			s({0: None, 1: None}) + s("a") + s("bee") + s("2") + s((None, None)),
 			objops.totalSizeOf({"bee": "a", ("bee", "a"): "2"}))
 
 
 	def test_circularList(self):
-		s = sys.getsizeof
+		s = getsizeof
 
 		c = []
 		c.append(c)
@@ -245,7 +249,7 @@ class TotalSizeOfTests(unittest.TestCase):
 
 
 	def test_circularDict(self):
-		s = sys.getsizeof
+		s = getsizeof
 
 		c = {}
 		c['key'] = c

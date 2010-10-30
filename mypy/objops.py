@@ -4,10 +4,42 @@ built-in types.
 """
 
 import re
-from math import log10
-from sys import getsizeof
+import sys
+from math import log, log10, ceil
 
 _postImportVars = vars().keys()
+
+
+_64bitPy = sys.maxint > 2**31 - 1
+_bytesPerWord = 8 if _64bitPy else 4
+_gcHeaderSize = 24 if _64bitPy else 12 # Just a guess
+_UCS4 = sys.maxunicode > 2**16 - 1
+_bytesPerCodePoint = 4 if _UCS4 else 2
+
+def basicGetSizeOf(obj):
+	if isinstance(obj, str):
+		return _gcHeaderSize + len(obj)
+	elif isinstance(obj, unicode):
+		return _gcHeaderSize + _bytesPerCodePoint * len(obj)
+	elif isinstance(obj, int):
+		return _gcHeaderSize + _bytesPerWord
+	elif isinstance(obj, float):
+		return _gcHeaderSize + 8
+	elif isinstance(obj, long):
+		# An estimate, probably on the low side.
+		return _gcHeaderSize + ceil(log(obj, 2))
+	elif isinstance(obj, dict):
+		return _gcHeaderSize + _bytesPerWord * (750 + 8 * len(obj))
+	elif isinstance(obj, (set, frozenset)):
+		return _gcHeaderSize + _bytesPerWord * (750 + 5 * len(obj))
+	else:
+		return _gcHeaderSize + _bytesPerWord
+	# TODO: handle C{complex}es
+
+try:
+	from sys import getsizeof
+except ImportError:
+	getsizeof = basicGetSizeOf
 
 
 # Neither of these accept "-0"
@@ -174,6 +206,9 @@ def totalSizeOf(obj, _alreadySeen=None):
 
 	This function assumes that containers do not modify their children as
 	they are traversed.
+
+	If your Python is < 2.6, the returned size will be less accurate, usually
+	lower than reality.
 	"""
 	if _alreadySeen is None:
 		_alreadySeen = set()
