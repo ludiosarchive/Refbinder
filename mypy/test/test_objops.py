@@ -117,11 +117,14 @@ class StrToIntInRangeTests(unittest.TestCase):
 class EnsureIntTests(unittest.TestCase):
 
 	def test_ensureInt(self):
-		self.assertIdentical(0, objops.ensureInt(0))
-		self.assertIdentical(-1, objops.ensureInt(-1))
-		self.assertIdentical(-1, objops.ensureInt(-1.0))
-		self.assertIdentical(0, objops.ensureInt(-0.0))
-		self.assertIdentical(2, objops.ensureInt(2.0))
+		self.assertEqual(0, objops.ensureInt(0))
+		self.assertEqual(-1, objops.ensureInt(-1))
+		self.assertEqual(-1, objops.ensureInt(-1.0))
+		self.assertTrue(isinstance(objops.ensureInt(-1.0), int))
+		self.assertEqual(0, objops.ensureInt(-0.0))
+		self.assertTrue(isinstance(objops.ensureInt(-0.0), int))
+		self.assertEqual(2, objops.ensureInt(2.0))
+		self.assertTrue(isinstance(objops.ensureInt(2.0), int))
 		self.assertEqual(200000000000000000000000000, objops.ensureInt(200000000000000000000000000))
 
 
@@ -140,10 +143,14 @@ class EnsureNonNegIntTests(unittest.TestCase):
 	function = lambda _ignoredSelf, x: objops.ensureNonNegInt(x)
 
 	def test_ensureNonNegInt(self):
-		self.assertIdentical(0, self.function(0))
-		self.assertIdentical(0, self.function(-0))
-		self.assertIdentical(0, self.function(-0.0))
-		self.assertIdentical(2, self.function(2.0))
+		for expected, input in [
+			(0, 0),
+			(0, -0),
+			(0, -0.0),
+			(2, 2.0),
+		]:
+			self.assertEqual(expected, input)
+			self.assertTrue(isinstance(expected, int))
 
 
 	def test_ensureNonNegIntExceptions(self):
