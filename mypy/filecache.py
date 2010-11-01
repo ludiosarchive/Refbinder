@@ -21,13 +21,11 @@ def defaultFingerprint(filename):
 
 
 def defaultGetContent(filename):
-	f = None
+	f = open(filename, 'rb')
 	try:
-		f = open(filename, 'rb')
 		return f.read()
 	finally:
-		if f:
-			f.close()
+		f.close()
 
 
 class FileCache(object):
