@@ -18,6 +18,10 @@ _bytesPerCodePoint = 4 if _UCS4 else 2
 
 def basicGetSizeOf(obj):
 	"""
+	Works like L{sys.getsizeof}, but only returns reasonable numbers for
+	a limited set of types: str, unicode, list, tuple, dict, set, frozenset,
+	bool, NoneType, int, float, long.
+
 	Many of these numbers are guesses.  Don't use this if L{sys.getsizeof}
 	is available.
 	"""
@@ -190,20 +194,20 @@ def ensureBool(value):
 
 def totalSizeOf(obj, _alreadySeen=None):
 	"""
-	Get the size of object C{obj} using C{sys.getsizeof} on the object itself
-	and all of its children recursively. If the same object appears more
-	than once inside C{obj}, it is counted only once.
+	Get the size of object C{obj} using L{sys.getsizeof} or L{basicGetSizeOf}
+	on the object itself and all of its children recursively.  If the same
+	object appears more than once inside C{obj}, it is counted only once.
 
-	This only works properly if C{obj} is a str, unicode, list, dict, set,
-	bool, NoneType, int, complex, float, long, or any nested combination
-	of the above. C{obj} is allowed to have circular references.
+	This only works properly if C{obj} is a str, unicode, list, tuple, dict,
+	set, frozenset, bool, NoneType, int, complex, float, long, or any nested
+	combination of the above.  C{obj} is allowed to have circular references.
 
 	This is particularly useful for getting a good estimate of how much
 	memory a JSON-decoded object is using after receiving it.
 
-	Design notes: sys.getsizeof seems to return very accurate numbers,
-	but does not recurse into the object's children. As we recurse into
-	the children, we keep track of objects we've already counted for two
+	Design notes: L{sys.getsizeof} or L{basicGetSizeOf} return reasonable
+	numbers, but do not recurse into the object's children.  As we recurse
+	into the children, we keep track of objects we've already counted for two
 	reasons:
 		- If we've already counted the object's memory usage, we don't
 		want to count it again.
@@ -212,7 +216,8 @@ def totalSizeOf(obj, _alreadySeen=None):
 	This function assumes that containers do not modify their children as
 	they are traversed.
 
-	If your Python is < 2.6, the returned size will be less accurate.
+	If your Python is < 2.6, the returned size will be less accurate, because
+	L{basicGetSizeOf} is used instead of L{sys.getsizeof}.
 	"""
 	if _alreadySeen is None:
 		_alreadySeen = set()
