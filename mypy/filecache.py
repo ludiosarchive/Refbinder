@@ -99,14 +99,18 @@ class FileCache(object):
 			callable()
 
 
-	def getContent(self, filename):
+	def getContent(self, filename, transform=None):
 		"""
 		C{filename} is a C{str} representing a file name.
+
+		If C{transform} is not C{None}, cache and return
+		C{transform(content)} instead of C{content}.
+		A separate cache entry will be created for each transform.
 
 		Returns (content, maybeNew) as (C{str}, C{bool}), or raises an
 		exception.
 		"""
-		cachedFile = self._cache.get(filename)
+		cachedFile = self._cache.get((transform, filename))
 		if cachedFile:
 			if self._recheckDelay == -1:
 				return cachedFile.content, False
@@ -124,7 +128,10 @@ class FileCache(object):
 			fingerprint = self._fingerprintCallable(filename)
 
 		content = self._getContentCallable(filename)
-		self._cache[filename] = _CachedFile(timeNow, fingerprint, content)
+		if transform is not None:
+			content = transform(content)
+		self._cache[(transform, filename)] = _CachedFile(
+			timeNow, fingerprint, content)
 		return content, True
 
 

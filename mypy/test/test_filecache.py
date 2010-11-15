@@ -79,6 +79,28 @@ class FileCacheTests(unittest.TestCase):
 		self.assertEqual(('aaaa', False), fc.getContent(filename))
 
 
+	def test_transform(self):
+		counts = [0]
+		def getContent(filename):
+			counts[0] += 1
+			# Pretend that the content is the filename
+			return filename
+
+		clock = Clock()
+		fc = filecache.FileCache(lambda: clock.rightNow, -1,
+			fingerprintCallable=lambda x: x,
+			getContentCallable=getContent)
+
+		self.assertEqual(('aaaa', True), fc.getContent('aaaa'))
+		self.assertEqual(1, counts[0])
+		self.assertEqual((4, True), fc.getContent('aaaa', transform=len))
+		self.assertEqual(2, counts[0])
+
+		# Make sure this doesn't read again
+		self.assertEqual((4, False), fc.getContent('aaaa', transform=len))
+		self.assertEqual(2, counts[0])
+
+
 	def test_clearCacheListeners(self):
 		clock = Clock()
 		fc = filecache.FileCache(lambda: clock.rightNow, -1)
