@@ -101,14 +101,13 @@ class FileCache(object):
 
 	def getContent(self, filename, transform=None):
 		"""
-		C{filename} is a C{str} representing a file name.
+		C{filename} is a C{str} or C{unicode} representing a file name.
 
 		If C{transform} is not C{None}, cache and return
-		C{transform(content)} instead of C{content}.
-		A separate cache entry will be created for each transform.
+		C{transform(content)} instead of C{content}.  A separate cache
+		entry is created for each (transform, filename).
 
-		Returns (content, maybeNew) as (C{str}, C{bool}), or raises an
-		exception.
+		Returns (content, maybeNew) or raises an exception.
 		"""
 		cachedFile = self._cache.get((transform, filename))
 		if cachedFile:
