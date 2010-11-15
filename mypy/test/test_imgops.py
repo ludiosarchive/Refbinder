@@ -8,7 +8,7 @@ class ImageSizeTests(unittest.TestCase):
 	"""
 	Tests for L{imgops.pngSize} and L{imgops.gifSize}
 	"""
-	images = FilePath(__file__).parent().child('images')
+	images = FilePath(__file__).sibling('images')
 	assert images.isdir(), "%r is not a dir or does not exist" % (images,)
 
 	def test_pngSize(self):
