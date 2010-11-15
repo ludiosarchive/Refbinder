@@ -77,3 +77,36 @@ class FileCacheTests(unittest.TestCase):
 		FilePath(filename).setContent('bbbbb')
 		clock.advance(3600)
 		self.assertEqual(('aaaa', False), fc.getContent(filename))
+
+
+	def test_clearCacheListeners(self):
+		clock = Clock()
+		fc = filecache.FileCache(lambda: clock.rightNow, -1)
+		fc.clearCache()
+
+		def a():
+			a.calls += 1
+		a.calls = 0
+
+		def b():
+			b.calls += 1
+		b.calls = 0
+
+		fc.addClearCacheListener(a)
+		fc.clearCache()
+		self.assertEqual(1, a.calls)
+
+		fc.addClearCacheListener(b)
+		fc.clearCache()
+		self.assertEqual(2, a.calls)
+		self.assertEqual(1, b.calls)
+
+		fc.removeClearCacheListener(a)
+		fc.clearCache()
+		self.assertEqual(2, a.calls)
+		self.assertEqual(2, b.calls)
+
+		fc.removeClearCacheListener(b)
+		fc.clearCache()
+		self.assertEqual(2, a.calls)
+		self.assertEqual(2, b.calls)

@@ -43,7 +43,7 @@ class FileCache(object):
 	"""
 
 	__slots__ = ('_getTimeCallable', '_recheckDelay', '_fingerprintCallable',
-		'_getContentCallable', '_cache')
+		'_getContentCallable', '_clearCacheListeners', '_cache')
 
 	def __init__(self, getTimeCallable, recheckDelay,
 	fingerprintCallable=defaultFingerprint,
@@ -68,11 +68,35 @@ class FileCache(object):
 		self._recheckDelay = recheckDelay
 		self._fingerprintCallable = fingerprintCallable
 		self._getContentCallable = getContentCallable
+		self._clearCacheListeners = []
 		self.clearCache()
+
+
+	def addClearCacheListener(self, callable):
+		"""
+		Register callable C{callable} to be called every time the cache is
+		cleared.
+
+		This is useful if you have "subcaches" that do things like remember
+		the md5sum of the file contents.
+		"""
+		self._clearCacheListeners.append(callable)
+
+
+	def removeClearCacheListener(self, callable):
+		"""
+		Unregister callable C{callable}, which will no longer be called
+		when the cache is cleared.
+		"""
+		self._clearCacheListeners.remove(callable)
 
 
 	def clearCache(self):
 		self._cache = securedict()
+		# Copy to prevent re-entrancy problems.
+		listeners = self._clearCacheListeners[:]
+		for callable in listeners:
+			callable()
 
 
 	def getContent(self, filename):
