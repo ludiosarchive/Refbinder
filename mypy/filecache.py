@@ -5,13 +5,12 @@ from mypy.dictops import securedict
 _postImportVars = vars().keys()
 
 
-class _CachedFile(object):
-	__slots__ = ('checkedAt', 'fingerprint', 'content')
+class _Fingerprint(object):
+	__slots__ = ('checkedAt', 'fingerprint')
 
-	def __init__(self, checkedAt, fingerprint, content):
+	def __init__(self, checkedAt, fingerprint):
 		self.checkedAt = checkedAt
 		self.fingerprint = fingerprint
-		self.content = content
 
 
 
@@ -43,7 +42,7 @@ class FileCache(object):
 	"""
 
 	__slots__ = ('_getTimeCallable', '_recheckDelay', '_fingerprintCallable',
-		'_getContentCallable', '_clearCacheListeners', '_cache')
+		'_getContentCallable', '_clearCacheListeners', '_fingerprintCache', '_contentCache')
 
 	def __init__(self, getTimeCallable, recheckDelay,
 	fingerprintCallable=defaultFingerprint,
@@ -92,11 +91,30 @@ class FileCache(object):
 
 
 	def clearCache(self):
-		self._cache = securedict()
+		self._fingerprintCache = securedict()
+		self._contentCache = securedict()
 		# Copy to prevent re-entrancy problems.
 		listeners = self._clearCacheListeners[:]
 		for callable in listeners:
 			callable()
+
+
+	def _reallyGetContent(self, filename, transform, tryCache):
+		"""
+		Get the content without checking the fingerprint.
+		"""
+		if tryCache:
+			try:
+				content = self._contentCache[(transform, filename)]
+				return content, False
+			except KeyError:
+				pass
+
+		content = self._getContentCallable(filename)
+		if transform is not None:
+			content = transform(content)
+		self._contentCache[(transform, filename)] = content
+		return content, True
 
 
 	def getContent(self, filename, transform=None):
@@ -109,29 +127,25 @@ class FileCache(object):
 
 		Returns (content, maybeNew) or raises an exception.
 		"""
-		cachedFile = self._cache.get((transform, filename))
-		if cachedFile:
+		cachedFingerprint = self._fingerprintCache.get(filename)
+		if cachedFingerprint:
 			if self._recheckDelay == -1:
-				return cachedFile.content, False
+				return self._reallyGetContent(filename, transform, True)
 
 			timeNow = self._getTimeCallable()
-			if cachedFile.checkedAt > timeNow - self._recheckDelay:
-				return cachedFile.content, False
+			if cachedFingerprint.checkedAt > timeNow - self._recheckDelay:
+				return self._reallyGetContent(filename, transform, True)
 
 			fingerprint = self._fingerprintCallable(filename)
-			if fingerprint == cachedFile.fingerprint:
-				cachedFile.checkedAt = timeNow
-				return cachedFile.content, False
+			if fingerprint == cachedFingerprint.fingerprint:
+				cachedFingerprint.checkedAt = timeNow
+				return self._reallyGetContent(filename, transform, True)
 		else:
 			timeNow = self._getTimeCallable()
 			fingerprint = self._fingerprintCallable(filename)
+			self._fingerprintCache[filename] = _Fingerprint(timeNow, fingerprint)
 
-		content = self._getContentCallable(filename)
-		if transform is not None:
-			content = transform(content)
-		self._cache[(transform, filename)] = _CachedFile(
-			timeNow, fingerprint, content)
-		return content, True
+		return self._reallyGetContent(filename, transform, False)
 
 
 from pypycpyo import optimizer
