@@ -125,6 +125,11 @@ class FileCache(object):
 		C{transform(content)} instead of C{content}.  A separate cache
 		entry is created for each (transform, filename).
 
+		Be very careful when passing a C{transform}; to avoid filling the
+		cache, you must pass the same callable object (for any one
+		transform).  Passing an inner function is not safe because a new
+		one is generated for each closure.
+
 		Returns (content, maybeNew) or raises an exception.
 		"""
 		cachedFingerprint = self._fingerprintCache.get(filename)
