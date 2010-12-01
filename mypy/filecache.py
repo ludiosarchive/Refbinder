@@ -42,7 +42,8 @@ class FileCache(object):
 	"""
 
 	__slots__ = ('_getTimeCallable', '_recheckDelay', '_fingerprintCallable',
-		'_getContentCallable', '_clearCacheListeners', '_fingerprintCache', '_contentCache')
+		'_getContentCallable', '_clearCacheListeners', '_fingerprintCache',
+		'_contentCache')
 
 	def __init__(self, getTimeCallable, recheckDelay,
 	fingerprintCallable=defaultFingerprint,
