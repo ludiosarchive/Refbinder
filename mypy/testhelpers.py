@@ -1,5 +1,10 @@
 class ReallyEqualMixin(object):
+	"""
+	A mixin for your L{unittest.TestCase}s to better test object equality
+	and inequality.  Details at:
 
+	http://ludios.org/ivank/2010/10/testing-your-eq-ne-cmp/
+	"""
 	def assertReallyEqual(self, a, b):
 		# assertEqual first, because it will have a good message if the
 		# assertion fails.
