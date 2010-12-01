@@ -57,5 +57,9 @@ _theRandomFactory = RandomFactory(bufferSize=4096*8)
 secureRandom = _theRandomFactory.secureRandom
 
 
-from pypycpyo import optimizer
-optimizer.bind_all_many(vars(), _postImportVars)
+try:
+	from pypycpyo import optimizer
+except ImportError:
+	pass
+else:
+	optimizer.bind_all_many(vars(), _postImportVars)
