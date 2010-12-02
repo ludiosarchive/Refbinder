@@ -24,3 +24,15 @@ TODO list
 - Move pypycpyo.optimizer to mypy, or remove all uses of it.
 
 - Fix or remove mypy.dictops.frozendict
+
+
+Code style notes
+================
+
+This package mostly follows the Divmod Coding Standard:
+	http://divmod.org/trac/wiki/CodingStandard
+except:
+-	Use hard tabs for indentation.
+-	Use hard tabs only at the beginning of a line.
+-	Prefer to have lines <= 80 characters, but always less than 100.
+-	In docstrings, use epytext.
