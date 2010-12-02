@@ -30,7 +30,7 @@ def _debugMessage(logCallable, message):
 		print message
 
 
-def _makeConstants(f, builtin_only=False, stoplist=[], logCallable=None):
+def _makeConstants(f, builtin_only=False, stoplist=set(), logCallable=None):
 	try:
 		co = f.func_code
 	except AttributeError:
@@ -43,7 +43,7 @@ def _makeConstants(f, builtin_only=False, stoplist=[], logCallable=None):
 	import __builtin__
 	env = vars(__builtin__).copy()
 	if builtin_only:
-		stoplist = dict.fromkeys(stoplist)
+		stoplist = set(stoplist)
 		stoplist.update(f.func_globals)
 	else:
 		env.update(f.func_globals)
@@ -138,7 +138,7 @@ _makeConstants = _makeConstants(_makeConstants) # optimize thyself!
 _debugMessage = _makeConstants(_debugMessage)
 
 
-def bindAll(mc, builtin_only=False, stoplist=[], logCallable=None):
+def bindAll(mc, builtin_only=False, stoplist=set(), logCallable=None):
 	"""
 	Recursively apply constant binding to functions in a module or class.
 
@@ -159,7 +159,7 @@ def bindAll(mc, builtin_only=False, stoplist=[], logCallable=None):
 
 
 @_makeConstants
-def makeConstants(builtin_only=False, stoplist=[], logCallable=None):
+def makeConstants(builtin_only=False, stoplist=set(), logCallable=None):
 	"""
 	Return a decorator for optimizing global references.
 
