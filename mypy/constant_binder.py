@@ -15,6 +15,7 @@ LOAD_ATTR = opmap['LOAD_ATTR']
 BUILD_TUPLE = opmap['BUILD_TUPLE']
 JUMP_FORWARD = opmap['JUMP_FORWARD']
 
+
 def _make_constants(f, builtin_only=False, stoplist=[], verbose=False):
 	try:
 		co = f.func_code
@@ -38,7 +39,7 @@ def _make_constants(f, builtin_only=False, stoplist=[], verbose=False):
 	while i < codelen:
 		opcode = newcode[i]
 		if opcode in (EXTENDED_ARG, STORE_GLOBAL):
-			return f	# for simplicity, only optimize common cases
+			return f # for simplicity, only optimize common cases
 		if opcode == LOAD_GLOBAL:
 			oparg = newcode[i+1] + (newcode[i+2] << 8)
 			name = co.co_names[oparg]
@@ -111,23 +112,24 @@ def _make_constants(f, builtin_only=False, stoplist=[], verbose=False):
 			print "new folded constant:", value
 
 	codestr = ''.join(map(chr, newcode))
-	codeobj = type(co)(co.co_argcount, co.co_nlocals, co.co_stacksize,
-					co.co_flags, codestr, tuple(newconsts), co.co_names,
-					co.co_varnames, co.co_filename, co.co_name,
-					co.co_firstlineno, co.co_lnotab, co.co_freevars,
-					co.co_cellvars)
+	codeobj = type(co)(
+		co.co_argcount, co.co_nlocals, co.co_stacksize, co.co_flags,
+		codestr, tuple(newconsts), co.co_names, co.co_varnames,
+		co.co_filename, co.co_name, co.co_firstlineno, co.co_lnotab,
+		co.co_freevars, co.co_cellvars)
 	return type(f)(codeobj, f.func_globals, f.func_name, f.func_defaults,
-					f.func_closure)
+		f.func_closure)
 
 _make_constants = _make_constants(_make_constants) # optimize thyself!
 
-def bind_all(mc, builtin_only=False, stoplist=[],  verbose=False):
-	"""Recursively apply constant binding to functions in a module or class.
+
+def bind_all(mc, builtin_only=False, stoplist=[], verbose=False):
+	"""
+	Recursively apply constant binding to functions in a module or class.
 
 	Use as the last line of the module (after everything is defined, but
 	before test code).  In modules that need modifiable globals, set
 	builtin_only to True.
-
 	"""
 	try:
 		d = vars(mc)
@@ -135,14 +137,16 @@ def bind_all(mc, builtin_only=False, stoplist=[],  verbose=False):
 		return
 	for k, v in d.items():
 		if type(v) is FunctionType:
-			newv = _make_constants(v, builtin_only, stoplist,  verbose)
+			newv = _make_constants(v, builtin_only, stoplist, verbose)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
 			bind_all(v, builtin_only, stoplist, verbose)
 
+
 @_make_constants
 def make_constants(builtin_only=False, stoplist=[], verbose=False):
-	""" Return a decorator for optimizing global references.
+	"""
+	Return a decorator for optimizing global references.
 
 	Replaces global references with their currently defined values.
 	If not defined, the dynamic (runtime) global lookup is left undisturbed.
@@ -156,13 +160,16 @@ def make_constants(builtin_only=False, stoplist=[], verbose=False):
 		raise ValueError("The bind_constants decorator must have arguments.")
 	return lambda f: _make_constants(f, builtin_only, stoplist, verbose)
 
+
 ## --------- Example call -----------------------------------------
 
 import random
 
 @make_constants(verbose=True)
 def sample(population, k):
-	"Choose k unique random elements from a population sequence."
+	"""
+	Choose k unique random elements from a population sequence.
+	"""
 	if not isinstance(population, (list, tuple, str)):
 		raise TypeError('Cannot handle type', type(population))
 	n = len(population)
@@ -170,11 +177,12 @@ def sample(population, k):
 		raise ValueError, "sample larger than population"
 	result = [None] * k
 	pool = list(population)
-	for i in xrange(k):		 # invariant:  non-selected at [0,n-i)
+	for i in xrange(k): # invariant: non-selected at [0,n-i)
 		j = int(random.random() * (n-i))
 		result[i] = pool[j]
-		pool[j] = pool[n-i-1]   # move non-selected item into vacancy
+		pool[j] = pool[n-i-1] # move non-selected item into vacancy
 	return result
+
 
 """ Output from the example call:
 
