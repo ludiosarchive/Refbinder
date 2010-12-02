@@ -5,6 +5,7 @@ which is Copyright (C) 2004-2010 Raymond Hettinger and licensed under the
 PSF License; see LICENSE.txt.
 """
 
+from types import FunctionType, ClassType
 from opcode import opmap, HAVE_ARGUMENT, EXTENDED_ARG
 globals().update(opmap)
 
