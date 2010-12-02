@@ -1,6 +1,9 @@
 """
-'ascii' codec, plus warnings. Suitable for use as the default encoding in
-`site.py`.
+An 'ascii' codec that emits warnings about implicit unicode<->str conversions.
+
+API compatibility warning: this module exists only for mypy.complainer and may
+be removed in the future.
+
 
 See also:
 http://washort.twistedmatrix.com/2010/11/unicode-in-python-and-how-to-prevent-it.html
