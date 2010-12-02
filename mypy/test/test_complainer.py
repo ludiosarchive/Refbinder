@@ -4,14 +4,14 @@ from twisted.trial import unittest
 from mypy import complainer
 
 
-class ComplainImplicitAsciiConversionsTests(unittest.TestCase):
+class ComplainImplicitUnicodeConversionsTests(unittest.TestCase):
 
 	def setUp(self):
 		self._wasEncoding = sys.getdefaultencoding()
 
 
 	def tearDown(self):
-		complainer.complainImplicitAsciiConversions(False)
+		complainer.complainImplicitUnicodeConversions(False)
 
 		if self._wasEncoding != sys.getdefaultencoding():
 			reload(sys)
@@ -19,19 +19,19 @@ class ComplainImplicitAsciiConversionsTests(unittest.TestCase):
 
 
 	def test_enableDisable(self):
-		complainer.complainImplicitAsciiConversions(True)
+		complainer.complainImplicitUnicodeConversions(True)
 
 		self.assertWarns(UnicodeWarning,
 			"Implicit conversion of str to unicode",
 			__file__, lambda: unicode('should-emit-a-warning'))
 
-		complainer.complainImplicitAsciiConversions(False)
+		complainer.complainImplicitUnicodeConversions(False)
 
 		unicode('should-not-emit-a-warning')
 
 
 	def test_strToUnicode(self):
-		complainer.complainImplicitAsciiConversions(True)
+		complainer.complainImplicitUnicodeConversions(True)
 
 		self.assertWarns(UnicodeWarning,
 			"Implicit conversion of unicode to str",
@@ -39,8 +39,8 @@ class ComplainImplicitAsciiConversionsTests(unittest.TestCase):
 
 
 	def test_enableIsIdempotent(self):
-		complainer.complainImplicitAsciiConversions(True)
-		complainer.complainImplicitAsciiConversions(True)
+		complainer.complainImplicitUnicodeConversions(True)
+		complainer.complainImplicitUnicodeConversions(True)
 
 		self.assertWarns(UnicodeWarning,
 			"Implicit conversion of str to unicode",
@@ -48,9 +48,9 @@ class ComplainImplicitAsciiConversionsTests(unittest.TestCase):
 
 
 	def test_disableIsIdempotent(self):
-		complainer.complainImplicitAsciiConversions(True)
-		complainer.complainImplicitAsciiConversions(False)
-		complainer.complainImplicitAsciiConversions(False)
+		complainer.complainImplicitUnicodeConversions(True)
+		complainer.complainImplicitUnicodeConversions(False)
+		complainer.complainImplicitUnicodeConversions(False)
 
 		unicode('should-not-emit-a-warning')
 
@@ -59,7 +59,7 @@ class ComplainImplicitAsciiConversionsTests(unittest.TestCase):
 		reload(sys)
 		sys.setdefaultencoding('utf-8')
 		self.assertRaises(complainer.CannotComplain,
-			lambda: complainer.complainImplicitAsciiConversions(True))
+			lambda: complainer.complainImplicitUnicodeConversions(True))
 
 
 	def test_disableComplaintsWithBadDefaultEncoding(self):
@@ -69,5 +69,5 @@ class ComplainImplicitAsciiConversionsTests(unittest.TestCase):
 		"""
 		reload(sys)
 		sys.setdefaultencoding('utf-8')
-		complainer.complainImplicitAsciiConversions(False)
-		complainer.complainImplicitAsciiConversions(False)
+		complainer.complainImplicitUnicodeConversions(False)
+		complainer.complainImplicitUnicodeConversions(False)

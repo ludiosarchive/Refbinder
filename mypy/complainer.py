@@ -18,7 +18,7 @@ class CannotComplain(Exception):
 
 
 
-def complainImplicitAsciiConversions(complain):
+def complainImplicitUnicodeConversions(complain):
 	"""
 	If C{complain} is true, emit warnings about implicit unicode<->ascii
 	conversions.  If false, disable these warnings.
