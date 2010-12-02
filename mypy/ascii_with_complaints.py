@@ -1,6 +1,14 @@
 """
 'ascii' codec, plus warnings. Suitable for use as the default encoding in
 `site.py`.
+
+See also:
+http://washort.twistedmatrix.com/2010/11/unicode-in-python-and-how-to-prevent-it.html
+
+
+This module is heavily based on http://twistedmatrix.com/~washort/ascii_with_complaints.py
+which is:
+
 Copyright Allen Short, 2010.
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -35,59 +43,93 @@ Python Software Foundation; All Rights Reserved
 Written by Marc-Andre Lemburg (mal@lemburg.com).
 
 (c) Copyright CNRI, All Rights Reserved. NO WARRANTY.
-
 """
-import codecs, warnings
+
+
+from codecs import (
+	ascii_encode, ascii_decode, Codec, IncrementalEncoder,
+	IncrementalDecoder, StreamWriter, StreamReader, CodecInfo, register)
+from warnings import warn
+
+_postImportVars = vars().keys()
+
 
 def encode(input, errors='strict'):
-    warnings.warn("Implicit conversion of unicode to str", UnicodeWarning, 2)
-    return codecs.ascii_encode(input, errors)
+	warn("Implicit conversion of unicode to str", UnicodeWarning, 2)
+	return ascii_encode(input, errors)
 
 
 def decode(input, errors='strict'):
-    warnings.warn("Implicit conversion of str to unicode", UnicodeWarning, 2)
-    return codecs.ascii_decode(input, errors)
+	warn("Implicit conversion of str to unicode", UnicodeWarning, 2)
+	return ascii_decode(input, errors)
+
+
+class ComplainingCodec(Codec):
+
+	def encode(self, input, errors='strict'):
+		return encode(input, errors)
+
+
+	def decode(self, input, errors='strict'):
+		return decode(input, errors)
 
 
 
-class Codec(codecs.Codec):
+class ComplainingIncrementalEncoder(IncrementalEncoder):
 
-    def encode(self, input,errors='strict'):
-        return encode(input,errors)
-    def decode(self, input,errors='strict'):
-        return decode(input,errors)
+	def encode(self, input, final=False):
+		return encode(input, self.errors)[0]
 
 
-class IncrementalEncoder(codecs.IncrementalEncoder):
-    def encode(self, input, final=False):
-        return encode(input, self.errors)[0]
 
-class IncrementalDecoder(codecs.IncrementalDecoder):
-    def decode(self, input, final=False):
-        return decode(input, self.errors)[0]
+class ComplainingIncrementalDecoder(IncrementalDecoder):
 
-class StreamWriter(Codec,codecs.StreamWriter):
-    pass
-
-class StreamReader(Codec,codecs.StreamReader):
-    pass
+	def decode(self, input, final=False):
+		return decode(input, self.errors)[0]
 
 
-### encodings module API
 
+class ComplainingStreamWriter(ComplainingCodec, StreamWriter):
+	pass
+
+
+
+class ComplainingStreamReader(ComplainingCodec, StreamReader):
+	pass
+
+
+
+# The encodings module API requires a `getregentry` function.
 def getregentry():
-    return codecs.CodecInfo(
-        name='ascii_with_complaints',
-        encode=encode,
-        decode=decode,
-        incrementalencoder=IncrementalEncoder,
-        incrementaldecoder=IncrementalDecoder,
-        streamwriter=StreamWriter,
-        streamreader=StreamReader,
-    )
+	return CodecInfo(
+		name='ascii_with_complaints',
+		encode=encode,
+		decode=decode,
+		incrementalencoder=ComplainingIncrementalEncoder,
+		incrementaldecoder=ComplainingIncrementalDecoder,
+		streamwriter=ComplainingStreamWriter,
+		streamreader=ComplainingStreamReader,
+	)
+
 
 def search_function(encoding):
-    if encoding == 'ascii_with_complaints':
-        return getregentry()
+	if encoding == 'ascii_with_complaints':
+		return getregentry()
 
-codecs.register(search_function)
+
+def registerCodec():
+	"""
+	Register the ascii_with_complaints codec.
+	"""
+	register(search_function)
+
+
+__all__ = ['registerCodec']
+
+
+try:
+	from pypycpyo import optimizer
+except ImportError:
+	pass
+else:
+	optimizer.bind_all_many(vars(), _postImportVars)
