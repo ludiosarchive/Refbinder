@@ -7,7 +7,13 @@ PSF License; see LICENSE.txt.
 
 from types import FunctionType, ClassType
 from opcode import opmap, HAVE_ARGUMENT, EXTENDED_ARG
-globals().update(opmap)
+
+STORE_GLOBAL = opmap['STORE_GLOBAL']
+LOAD_GLOBAL = opmap['LOAD_GLOBAL']
+LOAD_CONST = opmap['LOAD_CONST']
+LOAD_ATTR = opmap['LOAD_ATTR']
+BUILD_TUPLE = opmap['BUILD_TUPLE']
+JUMP_FORWARD = opmap['JUMP_FORWARD']
 
 def _make_constants(f, builtin_only=False, stoplist=[], verbose=False):
 	try:
