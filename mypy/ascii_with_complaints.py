@@ -6,8 +6,8 @@ See also:
 http://washort.twistedmatrix.com/2010/11/unicode-in-python-and-how-to-prevent-it.html
 
 
-This module is heavily based on http://twistedmatrix.com/~washort/ascii_with_complaints.py
-which is:
+This module is almost a copy of
+http://twistedmatrix.com/~washort/ascii_with_complaints.py , which is:
 
 Copyright Allen Short, 2010.
 
@@ -46,9 +46,7 @@ Written by Marc-Andre Lemburg (mal@lemburg.com).
 """
 
 
-from codecs import (
-	ascii_encode, ascii_decode, Codec, IncrementalEncoder,
-	IncrementalDecoder, StreamWriter, StreamReader, CodecInfo, register)
+import codecs
 from warnings import warn
 
 _postImportVars = vars().keys()
@@ -56,15 +54,15 @@ _postImportVars = vars().keys()
 
 def encode(input, errors='strict'):
 	warn("Implicit conversion of unicode to str", UnicodeWarning, 2)
-	return ascii_encode(input, errors)
+	return codecs.ascii_encode(input, errors)
 
 
 def decode(input, errors='strict'):
 	warn("Implicit conversion of str to unicode", UnicodeWarning, 2)
-	return ascii_decode(input, errors)
+	return codecs.ascii_decode(input, errors)
 
 
-class ComplainingCodec(Codec):
+class Codec(codecs.Codec):
 
 	def encode(self, input, errors='strict'):
 		return encode(input, errors)
@@ -75,56 +73,44 @@ class ComplainingCodec(Codec):
 
 
 
-class ComplainingIncrementalEncoder(IncrementalEncoder):
+class IncrementalEncoder(codecs.IncrementalEncoder):
 
 	def encode(self, input, final=False):
 		return encode(input, self.errors)[0]
 
 
 
-class ComplainingIncrementalDecoder(IncrementalDecoder):
+class IncrementalDecoder(codecs.IncrementalDecoder):
 
 	def decode(self, input, final=False):
 		return decode(input, self.errors)[0]
 
 
 
-class ComplainingStreamWriter(ComplainingCodec, StreamWriter):
+class StreamWriter(Codec, codecs.StreamWriter):
 	pass
 
 
 
-class ComplainingStreamReader(ComplainingCodec, StreamReader):
+class StreamReader(Codec, codecs.StreamReader):
 	pass
 
 
+
+ENCODING_NAME = 'mypy.ascii_with_complaints'
 
 # The encodings module API requires a `getregentry` function.
 def getregentry():
-	return CodecInfo(
-		name='ascii_with_complaints',
+	return codecs.CodecInfo(
+		# `name` does not have to be a module name, but it is here.
+		name=ENCODING_NAME,
 		encode=encode,
 		decode=decode,
-		incrementalencoder=ComplainingIncrementalEncoder,
-		incrementaldecoder=ComplainingIncrementalDecoder,
-		streamwriter=ComplainingStreamWriter,
-		streamreader=ComplainingStreamReader,
+		incrementalencoder=IncrementalEncoder,
+		incrementaldecoder=IncrementalDecoder,
+		streamwriter=StreamWriter,
+		streamreader=StreamReader,
 	)
-
-
-def search_function(encoding):
-	if encoding == 'ascii_with_complaints':
-		return getregentry()
-
-
-def registerCodec():
-	"""
-	Register the ascii_with_complaints codec.
-	"""
-	register(search_function)
-
-
-__all__ = ['registerCodec']
 
 
 try:
