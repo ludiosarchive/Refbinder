@@ -16,7 +16,7 @@ BUILD_TUPLE = opmap['BUILD_TUPLE']
 JUMP_FORWARD = opmap['JUMP_FORWARD']
 
 
-def _make_constants(f, builtin_only=False, stoplist=[], verbose=False):
+def _makeConstants(f, builtin_only=False, stoplist=[], verbose=False):
 	try:
 		co = f.func_code
 	except AttributeError:
@@ -120,10 +120,10 @@ def _make_constants(f, builtin_only=False, stoplist=[], verbose=False):
 	return type(f)(codeobj, f.func_globals, f.func_name, f.func_defaults,
 		f.func_closure)
 
-_make_constants = _make_constants(_make_constants) # optimize thyself!
+_makeConstants = _makeConstants(_makeConstants) # optimize thyself!
 
 
-def bind_all(mc, builtin_only=False, stoplist=[], verbose=False):
+def bindAll(mc, builtin_only=False, stoplist=[], verbose=False):
 	"""
 	Recursively apply constant binding to functions in a module or class.
 
@@ -137,14 +137,14 @@ def bind_all(mc, builtin_only=False, stoplist=[], verbose=False):
 		return
 	for k, v in d.items():
 		if type(v) is FunctionType:
-			newv = _make_constants(v, builtin_only, stoplist, verbose)
+			newv = _makeConstants(v, builtin_only, stoplist, verbose)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
-			bind_all(v, builtin_only, stoplist, verbose)
+			bindAll(v, builtin_only, stoplist, verbose)
 
 
-@_make_constants
-def make_constants(builtin_only=False, stoplist=[], verbose=False):
+@_makeConstants
+def makeConstants(builtin_only=False, stoplist=[], verbose=False):
 	"""
 	Return a decorator for optimizing global references.
 
@@ -156,6 +156,6 @@ def make_constants(builtin_only=False, stoplist=[], verbose=False):
 	If verbose is True, prints each substitution as is occurs
 
 	"""
-	if type(builtin_only) == type(make_constants):
+	if type(builtin_only) == type(makeConstants):
 		raise ValueError("The bind_constants decorator must have arguments.")
-	return lambda f: _make_constants(f, builtin_only, stoplist, verbose)
+	return lambda f: _makeConstants(f, builtin_only, stoplist, verbose)
