@@ -5,6 +5,7 @@ which is Copyright (C) 2004-2010 Raymond Hettinger and licensed under the
 PSF License; see LICENSE.txt.
 """
 
+import os
 from types import FunctionType, ClassType
 from opcode import opmap, HAVE_ARGUMENT, EXTENDED_ARG
 
@@ -15,8 +16,21 @@ LOAD_ATTR = opmap['LOAD_ATTR']
 BUILD_TUPLE = opmap['BUILD_TUPLE']
 JUMP_FORWARD = opmap['JUMP_FORWARD']
 
+try:
+	_forcePrintDebug = bool(int(
+		os.environ['MYPY_CONSTANT_BINDER_PRINT_DEBUG']))
+except (KeyError, ValueError):
+	_forcePrintDebug = False
 
-def _makeConstants(f, builtin_only=False, stoplist=[], verbose=False):
+
+def _debugMessage(logCallable, message):
+	if logCallable is not None:
+		logCallable(message)
+	elif _forcePrintDebug:
+		print message
+
+
+def _makeConstants(f, builtin_only=False, stoplist=[], logCallable=None):
 	try:
 		co = f.func_code
 	except AttributeError:
@@ -54,8 +68,8 @@ def _makeConstants(f, builtin_only=False, stoplist=[], verbose=False):
 				newcode[i] = LOAD_CONST
 				newcode[i+1] = pos & 0xFF
 				newcode[i+2] = pos >> 8
-				if verbose:
-					print name, '-->', value
+				_debugMessage(logCallable,
+					"%s --> %s" % (name, value))
 		i += 1
 		if opcode >= HAVE_ARGUMENT:
 			i += 2
@@ -108,8 +122,8 @@ def _makeConstants(f, builtin_only=False, stoplist=[], verbose=False):
 		newcode[i+1] = n & 0xFF
 		newcode[i+2] = n >> 8
 		i += 3
-		if verbose:
-			print "new folded constant:", value
+		_debugMessage(logCallable,
+			"new folded constant: %r" % (value,))
 
 	codestr = ''.join(map(chr, newcode))
 	codeobj = type(co)(
@@ -121,9 +135,10 @@ def _makeConstants(f, builtin_only=False, stoplist=[], verbose=False):
 		f.func_closure)
 
 _makeConstants = _makeConstants(_makeConstants) # optimize thyself!
+_debugMessage = _makeConstants(_debugMessage)
 
 
-def bindAll(mc, builtin_only=False, stoplist=[], verbose=False):
+def bindAll(mc, builtin_only=False, stoplist=[], logCallable=None):
 	"""
 	Recursively apply constant binding to functions in a module or class.
 
@@ -137,25 +152,25 @@ def bindAll(mc, builtin_only=False, stoplist=[], verbose=False):
 		return
 	for k, v in d.items():
 		if type(v) is FunctionType:
-			newv = _makeConstants(v, builtin_only, stoplist, verbose)
+			newv = _makeConstants(v, builtin_only, stoplist, logCallable)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
-			bindAll(v, builtin_only, stoplist, verbose)
+			bindAll(v, builtin_only, stoplist, logCallable)
 
 
 @_makeConstants
-def makeConstants(builtin_only=False, stoplist=[], verbose=False):
+def makeConstants(builtin_only=False, stoplist=[], logCallable=None):
 	"""
 	Return a decorator for optimizing global references.
 
 	Replaces global references with their currently defined values.
 	If not defined, the dynamic (runtime) global lookup is left undisturbed.
-	If builtin_only is True, then only builtins are optimized.
-	Variable names in the stoplist are also left undisturbed.
+	If C{builtin_only} is True, then only builtins are optimized.
+	Variable names in the C{stoplist} are also left undisturbed.
 	Also, folds constant attr lookups and tuples of constants.
-	If verbose is True, prints each substitution as is occurs
+	If C{logCallable} is not C{None}, call it with debug messages.
 
 	"""
 	if type(builtin_only) == type(makeConstants):
 		raise ValueError("The bind_constants decorator must have arguments.")
-	return lambda f: _makeConstants(f, builtin_only, stoplist, verbose)
+	return lambda f: _makeConstants(f, builtin_only, stoplist, logCallable)
