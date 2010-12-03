@@ -2,7 +2,7 @@
 Simple image operations that shouldn't require a big library.
 """
 
-
+import sys
 import struct
 
 _postImportVars = vars().keys()
@@ -50,9 +50,5 @@ def isPng(s):
 	return s.startswith('\x89\x50\x4E\x47\x0D\x0A\x1A\x0A')
 
 
-try:
-	from pypycpyo import optimizer
-except ImportError:
-	pass
-else:
-	optimizer.bind_all_many(vars(), _postImportVars)
+from mypy import constant_binder
+constant_binder.bindRecursive(sys.modules[__name__], _postImportVars)

@@ -48,7 +48,7 @@ Written by Marc-Andre Lemburg (mal@lemburg.com).
 (c) Copyright CNRI, All Rights Reserved. NO WARRANTY.
 """
 
-
+import sys
 import codecs
 from warnings import warn
 
@@ -116,9 +116,5 @@ def getregentry():
 	)
 
 
-try:
-	from pypycpyo import optimizer
-except ImportError:
-	pass
-else:
-	optimizer.bind_all_many(vars(), _postImportVars)
+from mypy import constant_binder
+constant_binder.bindRecursive(sys.modules[__name__], _postImportVars)

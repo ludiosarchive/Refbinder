@@ -1,3 +1,4 @@
+import sys
 import types
 import operator
 
@@ -100,9 +101,5 @@ class GenericIdentifier(Constant):
 
 
 
-try:
-	from pypycpyo import optimizer
-except ImportError:
-	pass
-else:
-	optimizer.bind_all_many(vars(), _postImportVars)
+from mypy import constant_binder
+constant_binder.bindRecursive(sys.modules[__name__], _postImportVars)

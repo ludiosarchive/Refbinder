@@ -1,4 +1,5 @@
 import os
+import sys
 
 from mypy.dictops import securedict
 
@@ -154,9 +155,6 @@ class FileCache(object):
 		return self._reallyGetContent(filename, transform, False)
 
 
-try:
-	from pypycpyo import optimizer
-except ImportError:
-	pass
-else:
-	optimizer.bind_all_many(vars(), _postImportVars)
+
+from mypy import constant_binder
+constant_binder.bindRecursive(sys.modules[__name__], _postImportVars)
