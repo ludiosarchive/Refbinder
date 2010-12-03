@@ -1,10 +1,6 @@
 import os
 
-try:
-	_forceOff = bool(int(
-		os.environ['MYPY_CONSTANT_BINDER_DISABLE']))
-except (KeyError, ValueError):
-	_forceOff = False
+_constant_binder = None
 
 
 def _noopBindRecursive(mc, skip=(), builtinsOnly=False,
@@ -19,30 +15,55 @@ logCallable=None):
 	return lambda f: f
 
 
+def bindRecursive(*args, **kwargs):
+	if _constant_binder is None:
+		return _noopBindRecursive(*args, **kwargs)
+	else:
+		return _constant_binder.bindRecursive(*args, **kwargs)
+
+
+def makeConstants(*args, **kwargs):
+	if _constant_binder is None:
+		return _noopMakeConstants(*args, **kwargs)
+	else:
+		return _constant_binder.makeConstants(*args, **kwargs)
+
+
 def disableBinders():
 	"""
 	Make L{bindRecursive} and L{makeConstants} essentially do nothing.
 	This does not affect already-bound functions.
 	"""
-	global bindRecursive
-	global makeConstants
-	bindRecursive = _noopBindRecursive
-	makeConstants = _noopMakeConstants
+	global _constant_binder
+	_constant_binder = None
 
 
-def isNoop():
-	return bindRecursive == _noopBindRecursive
-
-
-if not _forceOff:
+def enableBinders():
+	"""
+	Make L{bindRecursive} and L{makeConstants} actually perform constant-
+	binding.  This may silently fail, so if you care about whether it worked,
+	call L{isEnabled}.
+	"""
+	global _constant_binder
 	try:
 		from mypy import _constant_binder
 	except (ImportError, KeyError):
 		# ImportError might be raised from a failed opcode.* import.
 		# KeyError might be raised from a failed opmap['']
 		disableBinders()
-	else:
-		bindRecursive = _constant_binder.bindRecursive
-		makeConstants = _constant_binder.makeConstants
+
+
+def areBindersEnabled():
+	return _constant_binder is not None
+
+
+try:
+	_autoenable = bool(int(
+		os.environ['MYPY_CONSTANT_BINDER_AUTOENABLE']))
+except (KeyError, ValueError):
+	_autoenable = False
+
+if _autoenable:
+	enableBinders()
 else:
 	disableBinders()

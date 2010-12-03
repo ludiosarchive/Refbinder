@@ -5,12 +5,15 @@ from twisted.trial import unittest
 from twisted.python import log
 
 # constant_binder should be importable on any Python implementation.
-from mypy.constant_binder import bindRecursive, makeConstants
-
+# _constant_binder might not be, though.
+from mypy.constant_binder import (bindRecursive, makeConstants, enableBinders,
+	areBindersEnabled)
 
 class _BaseExpected(unittest.TestCase):
 
 	def setUp(self):
+		enableBinders()
+		assert areBindersEnabled()
 		self.messages = []
 
 
@@ -165,6 +168,11 @@ class _DummyNewStyle(object):
 
 
 class BindRecursiveTests(unittest.TestCase):
+
+	def setUp(self):
+		enableBinders()
+		assert areBindersEnabled()
+
 
 	def test_bindRecursiveDummyOldStyle(self):
 		bindRecursive(_DummyOldStyle)
