@@ -82,6 +82,10 @@ new folded constant: <built-in method random of Random object at """.split('\n')
 
 		self._verifyExpected()
 
+		# Run the function with bound names to make sure it still works.
+		out = sample(range(100), 30)
+		self.assertEqual(30, len(out))
+
 
 
 class MakeConstantsTestsNotVerbose(MakeConstantsTests):
