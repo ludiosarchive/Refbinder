@@ -9,13 +9,24 @@ import os
 from types import FunctionType, ClassType
 from opcode import opmap, HAVE_ARGUMENT, EXTENDED_ARG
 
-# These are known to be present on CPython and pypy 1.4.
+# These are known to be present in CPython and pypy 1.4.
 STORE_GLOBAL = opmap['STORE_GLOBAL']
 LOAD_GLOBAL = opmap['LOAD_GLOBAL']
 LOAD_CONST = opmap['LOAD_CONST']
 LOAD_ATTR = opmap['LOAD_ATTR']
 BUILD_TUPLE = opmap['BUILD_TUPLE']
 JUMP_FORWARD = opmap['JUMP_FORWARD']
+CALL_FUNCTION = opmap['CALL_FUNCTION']
+
+try:
+	# These are known to be present in pypy 1.4.
+	LOOKUP_METHOD = opmap['LOOKUP_METHOD']
+	CALL_METHOD = opmap['CALL_METHOD']
+except KeyError:
+	_hasPyPyOpcodes = False
+else:
+	_hasPyPyOpcodes = True
+
 
 try:
 	_forcePrintDebug = bool(int(
@@ -101,6 +112,25 @@ def _makeConstants(f, builtinsOnly=False, volatileNames=set(), logCallable=None)
 			except AttributeError:
 				continue
 			deletions = 1
+
+		elif _hasPyPyOpcodes and opcode == LOOKUP_METHOD:
+			try:
+				if newcode[i+3] != CALL_METHOD:
+					continue
+			except IndexError:
+				continue
+
+			obj = newtuple[-1]
+			oparg = newcode[i+1] + (newcode[i+2] << 8)
+			name = names[oparg]
+			try:
+				value = getattr(obj, name)
+			except AttributeError:
+				continue
+			deletions = 1
+
+			# Replace CALL_METHOD with CALL_FUNCTION
+			newcode[i+3] = CALL_FUNCTION
 
 		elif opcode == BUILD_TUPLE:
 			oparg = newcode[i+1] + (newcode[i+2] << 8)

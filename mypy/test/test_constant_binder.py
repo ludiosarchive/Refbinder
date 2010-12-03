@@ -7,12 +7,6 @@ from twisted.python import log
 # constant_binder should be importable on any Python implementation.
 from mypy.constant_binder import bindAll, makeConstants
 
-hasCPythonBytecode = sys.subversion[0] == 'CPython'
-
-if not hasCPythonBytecode:
-	skip = "This Python implementation does not have CPython bytecode."
-
-
 
 class _BaseExpected(unittest.TestCase):
 
@@ -55,9 +49,14 @@ list --> <type 'list'>
 xrange --> <type 'xrange'>
 int --> <type 'int'>
 random --> <module 'random' from
-new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)
-new folded constant: <built-in method random of Random object at """.split('\n')
+new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n')
 
+	if sys.subversion[0] == 'PyPy':
+		expected.append('new folded constant: <'
+			'bound method Random.random of <random.Random object at ')
+	else:
+		expected.append('new folded constant: <'
+			'built-in method random of Random object at ')
 
 	def test_makeConstants(self):
 		logCallable = self.messages.append if self.verbose_mc else None
