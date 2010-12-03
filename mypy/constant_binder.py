@@ -4,11 +4,11 @@ _constant_binder = None
 
 
 def _noopBindRecursive(mc, skip=(), builtinsOnly=False,
-volatileNames=(), logCallable=None):
+dontBindNames=(), logCallable=None):
 	pass
 
 
-def _noopMakeConstants(builtinsOnly=False, volatileNames=(),
+def _noopMakeConstants(builtinsOnly=False, dontBindNames=(),
 logCallable=None):
 	if type(builtinsOnly) == type(_noopMakeConstants):
 		raise ValueError("The makeConstants decorator must have arguments.")
