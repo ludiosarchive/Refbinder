@@ -166,9 +166,29 @@ class _DummyNewStyle(object):
 
 class BindAllTests(unittest.TestCase):
 
-	def test_bind_all_DummyOldStyle(self):
+	def test_bindAllDummyOldStyle(self):
 		bindAll(_DummyOldStyle)
 
 
-	def test_bind_all_DummyNewStyle(self):
+	def test_bindAllDummyNewStyle(self):
 		bindAll(_DummyNewStyle)
+
+
+	def test_bindAllWithSkip(self):
+		class BindMe(object):
+			def a(self): pass
+			def b(self): pass
+			def c(self): pass
+			def d(self): pass
+
+		old_a = BindMe.a
+		old_b = BindMe.b
+		old_c = BindMe.c
+		old_d = BindMe.d
+
+		bindAll(BindMe, skip=['a', 'c'])
+
+		self.assertEqual(BindMe.a, old_a)
+		self.assertEqual(BindMe.c, old_c)
+		self.assertNotEqual(BindMe.b, old_b)
+		self.assertNotEqual(BindMe.d, old_d)

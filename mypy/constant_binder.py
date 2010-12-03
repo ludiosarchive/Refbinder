@@ -169,9 +169,12 @@ _makeConstants = _makeConstants(_makeConstants) # optimize thyself!
 _debugMessage = _makeConstants(_debugMessage)
 
 
-def bindAll(mc, builtinsOnly=False, volatileNames=set(), logCallable=None):
+_emptySet = set()
+
+def bindAll(mc, skip=_emptySet, builtinsOnly=False, volatileNames=set(), logCallable=None):
 	"""
-	Recursively apply constant binding to functions in a module or class.
+	Recursively apply constant binding to functions in a module or class,
+	skipping functions/classes in C{mc} whose name is in C{skip}.
 
 	Use as the last line of the module (after everything is defined, but
 	before test code).  In modules that need modifiable globals, set
@@ -182,11 +185,13 @@ def bindAll(mc, builtinsOnly=False, volatileNames=set(), logCallable=None):
 	except TypeError:
 		return
 	for k, v in d.items():
+		if k in skip:
+			continue
 		if type(v) is FunctionType:
 			newv = _makeConstants(v, builtinsOnly, volatileNames, logCallable)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
-			bindAll(v, builtinsOnly, volatileNames, logCallable)
+			bindAll(v, _emptySet, builtinsOnly, volatileNames, logCallable)
 
 
 @_makeConstants
