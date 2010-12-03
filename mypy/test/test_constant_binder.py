@@ -40,7 +40,7 @@ class _BaseExpected(unittest.TestCase):
 class MakeConstantsTests(_BaseExpected):
 	builtinsOnly = False
 	verbose_mc = True
-	stoplist = set()
+	volatileNames = set()
 
 	expected = """\
 isinstance --> <built-in function isinstance>
@@ -62,7 +62,7 @@ new folded constant: <built-in method random of Random object at """.split('\n')
 	def test_makeConstants(self):
 		logCallable = self.messages.append if self.verbose_mc else None
 		@makeConstants(logCallable=logCallable,
-			builtinsOnly=self.builtinsOnly, stoplist=self.stoplist)
+			builtinsOnly=self.builtinsOnly, volatileNames=self.volatileNames)
 		def sample(population, k):
 			"""
 			Choose k unique random elements from a population sequence.
@@ -118,13 +118,13 @@ new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n'
 
 
 
-class MakeConstantsTestsBuiltinsOnlyPlusStoplist(MakeConstantsTests):
+class MakeConstantsTestsBuiltinsOnlyPlusVolatileNames(MakeConstantsTests):
 	"""
-	Bind builtins only with a stoplist.
+	Bind builtins only with a volatileNames.
 	"""
 	builtinsOnly = True
 	verbose_mc = True
-	stoplist = set(['len', 'str'])
+	volatileNames = set(['len', 'str'])
 
 	expected = """\
 isinstance --> <built-in function isinstance>

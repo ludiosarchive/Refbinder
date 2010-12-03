@@ -31,7 +31,7 @@ def _debugMessage(logCallable, message):
 		print message
 
 
-def _makeConstants(f, builtinsOnly=False, stoplist=set(), logCallable=None):
+def _makeConstants(f, builtinsOnly=False, volatileNames=set(), logCallable=None):
 	try:
 		co = f.func_code
 	except AttributeError:
@@ -44,8 +44,8 @@ def _makeConstants(f, builtinsOnly=False, stoplist=set(), logCallable=None):
 	import __builtin__
 	env = vars(__builtin__).copy()
 	if builtinsOnly:
-		stoplist = set(stoplist)
-		stoplist.update(f.func_globals)
+		volatileNames = set(volatileNames)
+		volatileNames.update(f.func_globals)
 	else:
 		env.update(f.func_globals)
 
@@ -58,7 +58,7 @@ def _makeConstants(f, builtinsOnly=False, stoplist=set(), logCallable=None):
 		if opcode == LOAD_GLOBAL:
 			oparg = newcode[i+1] + (newcode[i+2] << 8)
 			name = co.co_names[oparg]
-			if name in env and name not in stoplist:
+			if name in env and name not in volatileNames:
 				value = env[name]
 				for pos, v in enumerate(newconsts):
 					if v is value:
@@ -139,7 +139,7 @@ _makeConstants = _makeConstants(_makeConstants) # optimize thyself!
 _debugMessage = _makeConstants(_debugMessage)
 
 
-def bindAll(mc, builtinsOnly=False, stoplist=set(), logCallable=None):
+def bindAll(mc, builtinsOnly=False, volatileNames=set(), logCallable=None):
 	"""
 	Recursively apply constant binding to functions in a module or class.
 
@@ -153,25 +153,25 @@ def bindAll(mc, builtinsOnly=False, stoplist=set(), logCallable=None):
 		return
 	for k, v in d.items():
 		if type(v) is FunctionType:
-			newv = _makeConstants(v, builtinsOnly, stoplist, logCallable)
+			newv = _makeConstants(v, builtinsOnly, volatileNames, logCallable)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
-			bindAll(v, builtinsOnly, stoplist, logCallable)
+			bindAll(v, builtinsOnly, volatileNames, logCallable)
 
 
 @_makeConstants
-def makeConstants(builtinsOnly=False, stoplist=set(), logCallable=None):
+def makeConstants(builtinsOnly=False, volatileNames=set(), logCallable=None):
 	"""
 	Return a decorator for optimizing global references.
 
 	Replaces global references with their currently defined values.
 	If not defined, the dynamic (runtime) global lookup is left undisturbed.
 	If C{builtinsOnly} is True, then only builtins are optimized.
-	Variable names in the C{stoplist} are also left undisturbed.
+	Variable names in C{volatileNames} are also left undisturbed.
 	Also, folds constant attr lookups and tuples of constants.
 	If C{logCallable} is not C{None}, call it with debug messages.
 
 	"""
 	if type(builtinsOnly) == type(makeConstants):
 		raise ValueError("The makeConstants decorator must have arguments.")
-	return lambda f: _makeConstants(f, builtinsOnly, stoplist, logCallable)
+	return lambda f: _makeConstants(f, builtinsOnly, volatileNames, logCallable)
