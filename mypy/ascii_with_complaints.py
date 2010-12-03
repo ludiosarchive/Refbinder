@@ -116,5 +116,5 @@ def getregentry():
 	)
 
 
-from mypy import constant_binder
-constant_binder.bindRecursive(sys.modules[__name__], _postImportVars)
+from mypy import refbinder
+refbinder.bindRecursive(sys.modules[__name__], _postImportVars)

@@ -4,9 +4,9 @@ import sys
 from twisted.trial import unittest
 from twisted.python import log
 
-# constant_binder should be importable on any Python implementation.
-# _constant_binder might not be, though.
-from mypy.constant_binder import (bindRecursive, makeConstants, enableBinders,
+# refbinder should be importable on any Python implementation.
+# _refbinder might not be, though.
+from mypy.refbinder import (bindRecursive, makeConstants, enableBinders,
 	areBindersEnabled)
 
 class _BaseExpected(unittest.TestCase):

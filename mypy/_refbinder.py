@@ -30,7 +30,7 @@ else:
 
 try:
 	_forcePrintDebug = bool(int(
-		os.environ['MYPY_CONSTANT_BINDER_PRINT_DEBUG']))
+		os.environ['MYPY_REFBINDER_PRINT_DEBUG']))
 except (KeyError, ValueError):
 	_forcePrintDebug = False
 
@@ -171,7 +171,7 @@ _debugMessage = _makeConstants(_debugMessage)
 
 _emptySet = set()
 
-# Make sure this function signature matches the one in constant_binder.py
+# Make sure this function signature matches the one in refbinder.py
 def bindRecursive(mc, skip=_emptySet, builtinsOnly=False, dontBindNames=set(),
 logCallable=None):
 	"""
@@ -196,7 +196,7 @@ logCallable=None):
 			bindRecursive(v, _emptySet, builtinsOnly, dontBindNames, logCallable)
 
 
-# Make sure this function signature matches the one in constant_binder.py
+# Make sure this function signature matches the one in refbinder.py
 @_makeConstants
 def makeConstants(builtinsOnly=False, dontBindNames=set(), logCallable=None):
 	"""

@@ -1,6 +1,6 @@
 import os
 
-_constant_binder = None
+_refbinder = None
 
 
 def _noopBindRecursive(mc, skip=(), builtinsOnly=False,
@@ -16,17 +16,17 @@ logCallable=None):
 
 
 def bindRecursive(*args, **kwargs):
-	if _constant_binder is None:
+	if _refbinder is None:
 		return _noopBindRecursive(*args, **kwargs)
 	else:
-		return _constant_binder.bindRecursive(*args, **kwargs)
+		return _refbinder.bindRecursive(*args, **kwargs)
 
 
 def makeConstants(*args, **kwargs):
-	if _constant_binder is None:
+	if _refbinder is None:
 		return _noopMakeConstants(*args, **kwargs)
 	else:
-		return _constant_binder.makeConstants(*args, **kwargs)
+		return _refbinder.makeConstants(*args, **kwargs)
 
 
 def disableBinders():
@@ -34,8 +34,8 @@ def disableBinders():
 	Make L{bindRecursive} and L{makeConstants} essentially do nothing.
 	This does not affect already-bound functions.
 	"""
-	global _constant_binder
-	_constant_binder = None
+	global _refbinder
+	_refbinder = None
 
 
 def enableBinders():
@@ -44,9 +44,9 @@ def enableBinders():
 	binding.  This may silently fail, so if you care about whether it worked,
 	call L{isEnabled}.
 	"""
-	global _constant_binder
+	global _refbinder
 	try:
-		from mypy import _constant_binder
+		from mypy import _refbinder
 	except (ImportError, KeyError):
 		# ImportError might be raised from a failed opcode.* import.
 		# KeyError might be raised from a failed opmap['']
@@ -54,12 +54,12 @@ def enableBinders():
 
 
 def areBindersEnabled():
-	return _constant_binder is not None
+	return _refbinder is not None
 
 
 try:
 	_autoenable = bool(int(
-		os.environ['MYPY_CONSTANT_BINDER_AUTOENABLE']))
+		os.environ['MYPY_REFBINDER_AUTOENABLE']))
 except (KeyError, ValueError):
 	_autoenable = False
 
