@@ -173,5 +173,5 @@ def makeConstants(builtin_only=False, stoplist=set(), logCallable=None):
 
 	"""
 	if type(builtin_only) == type(makeConstants):
-		raise ValueError("The bind_constants decorator must have arguments.")
+		raise ValueError("The makeConstants decorator must have arguments.")
 	return lambda f: _makeConstants(f, builtin_only, stoplist, logCallable)
