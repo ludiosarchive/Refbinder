@@ -5,7 +5,7 @@ from twisted.trial import unittest
 from twisted.python import log
 
 # constant_binder should be importable on any Python implementation.
-from mypy.constant_binder import bindAll, makeConstants
+from mypy.constant_binder import bindRecursive, makeConstants
 
 
 class _BaseExpected(unittest.TestCase):
@@ -164,17 +164,17 @@ class _DummyNewStyle(object):
 
 
 
-class BindAllTests(unittest.TestCase):
+class BindRecursiveTests(unittest.TestCase):
 
-	def test_bindAllDummyOldStyle(self):
-		bindAll(_DummyOldStyle)
-
-
-	def test_bindAllDummyNewStyle(self):
-		bindAll(_DummyNewStyle)
+	def test_bindRecursiveDummyOldStyle(self):
+		bindRecursive(_DummyOldStyle)
 
 
-	def test_bindAllWithSkip(self):
+	def test_bindRecursiveDummyNewStyle(self):
+		bindRecursive(_DummyNewStyle)
+
+
+	def test_bindRecursiveWithSkip(self):
 		class BindMe(object):
 			def a(self): pass
 			def b(self): pass
@@ -186,7 +186,7 @@ class BindAllTests(unittest.TestCase):
 		old_c = BindMe.c
 		old_d = BindMe.d
 
-		bindAll(BindMe, skip=['a', 'c'])
+		bindRecursive(BindMe, skip=['a', 'c'])
 
 		self.assertEqual(BindMe.a, old_a)
 		self.assertEqual(BindMe.c, old_c)

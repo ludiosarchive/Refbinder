@@ -171,7 +171,8 @@ _debugMessage = _makeConstants(_debugMessage)
 
 _emptySet = set()
 
-def bindAll(mc, skip=_emptySet, builtinsOnly=False, volatileNames=set(), logCallable=None):
+def bindRecursive(mc, skip=_emptySet, builtinsOnly=False, volatileNames=set(),
+logCallable=None):
 	"""
 	Recursively apply constant binding to functions in a module or class,
 	skipping functions/classes in C{mc} whose name is in C{skip}.
@@ -191,7 +192,7 @@ def bindAll(mc, skip=_emptySet, builtinsOnly=False, volatileNames=set(), logCall
 			newv = _makeConstants(v, builtinsOnly, volatileNames, logCallable)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
-			bindAll(v, _emptySet, builtinsOnly, volatileNames, logCallable)
+			bindRecursive(v, _emptySet, builtinsOnly, volatileNames, logCallable)
 
 
 @_makeConstants
