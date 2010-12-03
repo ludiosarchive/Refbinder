@@ -28,7 +28,8 @@ class _BaseExpected(unittest.TestCase):
 			try:
 				line = self.messages[n]
 			except IndexError:
-				self.fail("line #%d not in messages: %r" % (n, expectedLine))
+				self.fail("line #%d not in messages: %r\nentire stdout:\n%s" % \
+					(n, expectedLine, '\n'.join(self.messages)))
 			self.assertTrue(
 				line.startswith(expectedLine),
 				'line %r did not start with %r\nentire stdout:\n%s' % \
