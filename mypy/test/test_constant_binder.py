@@ -87,7 +87,7 @@ new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n'
 
 
 
-class MakeConstantsTestsNotVerbose(MakeConstantsTests):
+class MakeConstantsWithoutLogCallableTests(MakeConstantsTests):
 	"""
 	Bind without a logCallable.
 	"""
@@ -98,7 +98,7 @@ class MakeConstantsTestsNotVerbose(MakeConstantsTests):
 
 
 
-class MakeConstantsTestsBuiltinsOnly(MakeConstantsTests):
+class MakeConstantsBuiltinsOnlyTests(MakeConstantsTests):
 	"""
 	Bind builtins only.  In this case, 'random' is no longer optimized.
 	"""
@@ -121,7 +121,7 @@ new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n'
 
 
 
-class MakeConstantsTestsBuiltinsOnlyPlusVolatileNames(MakeConstantsTests):
+class MakeConstantsBuiltinsOnlyPlusVolatileNamesTests(MakeConstantsTests):
 	"""
 	Bind builtins only with a volatileNames.
 	"""
