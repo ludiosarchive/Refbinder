@@ -9,6 +9,7 @@ import os
 from types import FunctionType, ClassType
 from opcode import opmap, HAVE_ARGUMENT, EXTENDED_ARG
 
+# These are known to be present on CPython and pypy 1.4.
 STORE_GLOBAL = opmap['STORE_GLOBAL']
 LOAD_GLOBAL = opmap['LOAD_GLOBAL']
 LOAD_CONST = opmap['LOAD_CONST']
