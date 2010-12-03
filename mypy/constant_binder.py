@@ -1,5 +1,5 @@
 """
-This module is almost a copy of
+This module is heavily based on
 http://code.activestate.com/recipes/277940-decorator-for-bindingconstants-at-compile-time/
 which is Copyright (C) 2004-2010 Raymond Hettinger and licensed under the
 PSF License; see LICENSE.txt.
