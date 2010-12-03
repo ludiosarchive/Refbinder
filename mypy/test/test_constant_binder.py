@@ -135,8 +135,7 @@ type --> <type 'type'>
 ValueError --> <type 'exceptions.ValueError'>
 list --> <type 'list'>
 xrange --> <type 'xrange'>
-int --> <type 'int'>
-new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n')
+int --> <type 'int'>""".split('\n')
 
 
 
