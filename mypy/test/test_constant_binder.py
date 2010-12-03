@@ -38,7 +38,7 @@ class _BaseExpected(unittest.TestCase):
 
 
 class MakeConstantsTests(_BaseExpected):
-	builtin_only = False
+	builtinsOnly = False
 	verbose_mc = True
 	stoplist = set()
 
@@ -62,7 +62,7 @@ new folded constant: <built-in method random of Random object at """.split('\n')
 	def test_makeConstants(self):
 		logCallable = self.messages.append if self.verbose_mc else None
 		@makeConstants(logCallable=logCallable,
-			builtin_only=self.builtin_only, stoplist=self.stoplist)
+			builtinsOnly=self.builtinsOnly, stoplist=self.stoplist)
 		def sample(population, k):
 			"""
 			Choose k unique random elements from a population sequence.
@@ -86,20 +86,20 @@ new folded constant: <built-in method random of Random object at """.split('\n')
 
 class MakeConstantsTestsNotVerbose(MakeConstantsTests):
 	"""
-	not verbose
+	Bind without a logCallable.
 	"""
-	builtin_only = True
+	builtinsOnly = True
 	verbose_mc = False
 
 	expected = []
 
 
 
-class MakeConstantsTestsBuiltinOnly(MakeConstantsTests):
+class MakeConstantsTestsBuiltinsOnly(MakeConstantsTests):
 	"""
-	With builtin_only=True, 'random' is no longer optimized.
+	Bind builtins only.  In this case, 'random' is no longer optimized.
 	"""
-	builtin_only = True
+	builtinsOnly = True
 	verbose_mc = True
 
 	expected = """\
@@ -118,11 +118,11 @@ new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n'
 
 
 
-class MakeConstantsTestsBuiltinOnlyPlusStoplist(MakeConstantsTests):
+class MakeConstantsTestsBuiltinsOnlyPlusStoplist(MakeConstantsTests):
 	"""
-	built-in only, plus a stoplist.
+	Bind builtins only with a stoplist.
 	"""
-	builtin_only = True
+	builtinsOnly = True
 	verbose_mc = True
 	stoplist = set(['len', 'str'])
 

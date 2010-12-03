@@ -31,7 +31,7 @@ def _debugMessage(logCallable, message):
 		print message
 
 
-def _makeConstants(f, builtin_only=False, stoplist=set(), logCallable=None):
+def _makeConstants(f, builtinsOnly=False, stoplist=set(), logCallable=None):
 	try:
 		co = f.func_code
 	except AttributeError:
@@ -43,7 +43,7 @@ def _makeConstants(f, builtin_only=False, stoplist=set(), logCallable=None):
 
 	import __builtin__
 	env = vars(__builtin__).copy()
-	if builtin_only:
+	if builtinsOnly:
 		stoplist = set(stoplist)
 		stoplist.update(f.func_globals)
 	else:
@@ -139,13 +139,13 @@ _makeConstants = _makeConstants(_makeConstants) # optimize thyself!
 _debugMessage = _makeConstants(_debugMessage)
 
 
-def bindAll(mc, builtin_only=False, stoplist=set(), logCallable=None):
+def bindAll(mc, builtinsOnly=False, stoplist=set(), logCallable=None):
 	"""
 	Recursively apply constant binding to functions in a module or class.
 
 	Use as the last line of the module (after everything is defined, but
 	before test code).  In modules that need modifiable globals, set
-	builtin_only to True.
+	builtinsOnly to True.
 	"""
 	try:
 		d = vars(mc)
@@ -153,25 +153,25 @@ def bindAll(mc, builtin_only=False, stoplist=set(), logCallable=None):
 		return
 	for k, v in d.items():
 		if type(v) is FunctionType:
-			newv = _makeConstants(v, builtin_only, stoplist, logCallable)
+			newv = _makeConstants(v, builtinsOnly, stoplist, logCallable)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
-			bindAll(v, builtin_only, stoplist, logCallable)
+			bindAll(v, builtinsOnly, stoplist, logCallable)
 
 
 @_makeConstants
-def makeConstants(builtin_only=False, stoplist=set(), logCallable=None):
+def makeConstants(builtinsOnly=False, stoplist=set(), logCallable=None):
 	"""
 	Return a decorator for optimizing global references.
 
 	Replaces global references with their currently defined values.
 	If not defined, the dynamic (runtime) global lookup is left undisturbed.
-	If C{builtin_only} is True, then only builtins are optimized.
+	If C{builtinsOnly} is True, then only builtins are optimized.
 	Variable names in the C{stoplist} are also left undisturbed.
 	Also, folds constant attr lookups and tuples of constants.
 	If C{logCallable} is not C{None}, call it with debug messages.
 
 	"""
-	if type(builtin_only) == type(makeConstants):
+	if type(builtinsOnly) == type(makeConstants):
 		raise ValueError("The makeConstants decorator must have arguments.")
-	return lambda f: _makeConstants(f, builtin_only, stoplist, logCallable)
+	return lambda f: _makeConstants(f, builtinsOnly, stoplist, logCallable)
