@@ -172,13 +172,3 @@ class BindAllTests(unittest.TestCase):
 
 	def test_bind_all_DummyNewStyle(self):
 		bindAll(_DummyNewStyle)
-
-
-	def test_bind_all_os(self):
-		import os
-		bindAll(os)
-
-
-	def test_bind_all_textwrap(self):
-		import textwrap
-		bindAll(textwrap)
