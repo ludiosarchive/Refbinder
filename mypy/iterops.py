@@ -30,3 +30,4 @@ def areAllEqual(iterable):
 
 from mypy import refbinder
 refbinder.bindRecursive(sys.modules[__name__], _postImportVars)
+del refbinder

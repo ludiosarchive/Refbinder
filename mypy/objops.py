@@ -247,3 +247,4 @@ def totalSizeOf(obj, _alreadySeen=None):
 
 from mypy import refbinder
 refbinder.bindRecursive(sys.modules[__name__], _postImportVars)
+del refbinder
