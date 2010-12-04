@@ -32,6 +32,10 @@ class _BaseExpected(unittest.TestCase):
 				'line %r did not start with %r\nentire stdout:\n%s' % \
 					(line, expectedLine, '\n'.join(self.messages)))
 
+		self.assertEqual(len(expected), len(self.messages),
+			"had more lines in messages than in expected\nentire stdout:\n%s" % \
+				('\n'.join(self.messages),))
+
 
 
 class MakeConstantsTests(_BaseExpected):
