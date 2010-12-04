@@ -42,6 +42,7 @@ class MakeConstantsTests(_BaseExpected):
 	builtinsOnly = False
 	verbose_mc = True
 	dontBindNames = set()
+	dontBindAttrs = set(['randint'])
 
 	expected = """\
 isinstance --> <built-in function isinstance>
@@ -54,13 +55,17 @@ len --> <built-in function len>
 ValueError --> <type 'exceptions.ValueError'>
 list --> <type 'list'>
 xrange --> <type 'xrange'>
+random --> <module 'random' from
 int --> <type 'int'>
 random --> <module 'random' from
 new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n')
 
 	if sys.subversion[0] == 'PyPy':
-		expected.append('new folded constant: <'
-			'bound method Random.random of <random.Random object at ')
+		pass
+		# We used to bind it, but then I realized it was too complicated to
+		# deal with LOOKUP_METHOD/CALL_METHOD.
+		#expected.append('new folded constant: <'
+		#	'bound method Random.random of <random.Random object at ')
 	else:
 		expected.append('new folded constant: <'
 			'built-in method random of Random object at ')
@@ -68,7 +73,9 @@ new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n'
 	def test_makeConstants(self):
 		logCallable = self.messages.append if self.verbose_mc else None
 		@makeConstants(logCallable=logCallable,
-			builtinsOnly=self.builtinsOnly, dontBindNames=self.dontBindNames)
+			builtinsOnly=self.builtinsOnly,
+			dontBindNames=self.dontBindNames,
+			dontBindAttrs=self.dontBindAttrs)
 		def sample(population, k):
 			"""
 			Choose k unique random elements from a population sequence.
@@ -81,7 +88,8 @@ new folded constant: (<type 'list'>, <type 'tuple'>, <type 'str'>)""".split('\n'
 			result = [None] * k
 			pool = list(population)
 			for i in xrange(k): # invariant: non-selected at [0,n-i)
-				j = int(random.random() * (n-i))
+				x = random.randint(0, 0) # nonsense line
+				j = x + int(random.random() * (n-i))
 				result[i] = pool[j]
 				pool[j] = pool[n-i-1] # move non-selected item into vacancy
 			return result

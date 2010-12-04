@@ -3,13 +3,13 @@ import os
 _refbinder = None
 
 
-def _noopBindRecursive(mc, skip=(), builtinsOnly=False,
-dontBindNames=(), logCallable=None):
+def _noopBindRecursive(mc, skip=(), builtinsOnly=False, dontBindNames=(),
+dontBindAttrs=(), logCallable=None):
 	pass
 
 
 def _noopMakeConstants(builtinsOnly=False, dontBindNames=(),
-logCallable=None):
+dontBindAttrs=(), logCallable=None):
 	if type(builtinsOnly) == type(_noopMakeConstants):
 		raise ValueError("The makeConstants decorator must have arguments.")
 	return lambda f: f

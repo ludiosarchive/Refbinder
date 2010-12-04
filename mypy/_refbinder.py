@@ -43,7 +43,10 @@ def _debugMessage(logCallable, message):
 		logCallable(message)
 
 
-def _makeConstants(f, builtinsOnly=False, dontBindNames=set(), logCallable=None):
+_emptySet = set()
+
+def _makeConstants(f, builtinsOnly=False, dontBindNames=_emptySet,
+dontBindAttrs=_emptySet, logCallable=None):
 	"""
 	Return a new function that works like C{f}, but with some
 	name/attr/method lookups replaced with constants.
@@ -116,30 +119,13 @@ def _makeConstants(f, builtinsOnly=False, dontBindNames=set(), logCallable=None)
 			obj = newtuple[-1]
 			oparg = newcode[i+1] + (newcode[i+2] << 8)
 			name = names[oparg]
+			if name in dontBindAttrs:
+				continue
 			try:
 				value = getattr(obj, name)
 			except AttributeError:
 				continue
 			deletions = 1
-
-		elif _hasPyPyOpcodes and opcode == LOOKUP_METHOD:
-			try:
-				if newcode[i+3] != CALL_METHOD:
-					continue
-			except IndexError:
-				continue
-
-			obj = newtuple[-1]
-			oparg = newcode[i+1] + (newcode[i+2] << 8)
-			name = names[oparg]
-			try:
-				value = getattr(obj, name)
-			except AttributeError:
-				continue
-			deletions = 1
-
-			# Replace CALL_METHOD with CALL_FUNCTION
-			newcode[i+3] = CALL_FUNCTION
 
 		elif opcode == BUILD_TUPLE:
 			oparg = newcode[i+1] + (newcode[i+2] << 8)
@@ -178,11 +164,9 @@ _makeConstants = _makeConstants(_makeConstants) # optimize thyself!
 _debugMessage = _makeConstants(_debugMessage)
 
 
-_emptySet = set()
-
 # Make sure this function signature matches the one in refbinder.py
 def bindRecursive(mc, skip=_emptySet, builtinsOnly=False,
-dontBindNames=_emptySet, logCallable=None):
+dontBindNames=_emptySet, dontBindAttrs=_emptySet, logCallable=None):
 	"""
 	Recursively apply constant binding to functions in a module or class,
 	skipping functions/classes in C{mc} whose name is in C{skip}.
@@ -199,15 +183,18 @@ dontBindNames=_emptySet, logCallable=None):
 		if k in skip:
 			continue
 		if type(v) is FunctionType:
-			newv = _makeConstants(v, builtinsOnly, dontBindNames, logCallable)
+			newv = _makeConstants(v, builtinsOnly, dontBindNames,
+				dontBindAttrs, logCallable)
 			setattr(mc, k, newv)
 		elif type(v) in (type, ClassType):
-			bindRecursive(v, _emptySet, builtinsOnly, dontBindNames, logCallable)
+			bindRecursive(v, _emptySet, builtinsOnly, dontBindNames,
+				dontBindAttrs, logCallable)
 
 
 # Make sure this function signature matches the one in refbinder.py
 @_makeConstants
-def makeConstants(builtinsOnly=False, dontBindNames=_emptySet, logCallable=None):
+def makeConstants(builtinsOnly=False, dontBindNames=_emptySet,
+dontBindAttrs=_emptySet, logCallable=None):
 	"""
 	Return a decorator for optimizing global references.
 
@@ -221,4 +208,5 @@ def makeConstants(builtinsOnly=False, dontBindNames=_emptySet, logCallable=None)
 	"""
 	if type(builtinsOnly) == type(makeConstants):
 		raise ValueError("The makeConstants decorator must have arguments.")
-	return lambda f: _makeConstants(f, builtinsOnly, dontBindNames, logCallable)
+	return lambda f: _makeConstants(f, builtinsOnly, dontBindNames,
+		dontBindAttrs, logCallable)
