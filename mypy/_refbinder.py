@@ -43,6 +43,14 @@ def _debugMessage(logCallable, message):
 
 
 def _makeConstants(f, builtinsOnly=False, dontBindNames=set(), logCallable=None):
+	"""
+	Return a new function that works like C{f}, but with some
+	name/attr/method lookups replaced with constants.
+
+	If a global is known at compile time, replace it with a constant.  Fold
+	tuples of constants into a single constant.  Fold constant attribute
+	lookups into a single constant.
+	"""
 	try:
 		co = f.func_code
 	except AttributeError:
