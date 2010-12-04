@@ -181,8 +181,8 @@ _debugMessage = _makeConstants(_debugMessage)
 _emptySet = set()
 
 # Make sure this function signature matches the one in refbinder.py
-def bindRecursive(mc, skip=_emptySet, builtinsOnly=False, dontBindNames=set(),
-logCallable=None):
+def bindRecursive(mc, skip=_emptySet, builtinsOnly=False,
+dontBindNames=_emptySet, logCallable=None):
 	"""
 	Recursively apply constant binding to functions in a module or class,
 	skipping functions/classes in C{mc} whose name is in C{skip}.
@@ -207,7 +207,7 @@ logCallable=None):
 
 # Make sure this function signature matches the one in refbinder.py
 @_makeConstants
-def makeConstants(builtinsOnly=False, dontBindNames=set(), logCallable=None):
+def makeConstants(builtinsOnly=False, dontBindNames=_emptySet, logCallable=None):
 	"""
 	Return a decorator for optimizing global references.
 
