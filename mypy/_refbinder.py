@@ -36,10 +36,11 @@ except (KeyError, ValueError):
 
 
 def _debugMessage(logCallable, message):
+	if _forcePrintDebug:
+		print message
+
 	if logCallable is not None:
 		logCallable(message)
-	elif _forcePrintDebug:
-		print message
 
 
 def _makeConstants(f, builtinsOnly=False, dontBindNames=set(), logCallable=None):
