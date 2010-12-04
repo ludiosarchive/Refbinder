@@ -21,8 +21,6 @@ TODO list
 
 - Add method to FileCache that yields every entry in the cache.
 
-- Move pypycpyo.optimizer to mypy, or remove all uses of it.
-
 - Fix or remove mypy.dictops.frozendict
 
 
