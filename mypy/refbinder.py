@@ -47,9 +47,12 @@ def enableBinders():
 	global _refbinder
 	try:
 		from mypy import _refbinder
-	except (ImportError, KeyError):
-		# ImportError might be raised from a failed opcode.* import.
-		# KeyError might be raised from a failed opmap['']
+	except (ImportError, KeyError, AttributeError):
+		# 1) ImportError might be raised from a failed opcode.* import.
+		# 2) KeyError might be raised from a failed opmap['']
+		# 3) AttributeError might result from a failure in _makeConstants,
+		# like what happens in Jython 2.5.2rc2:
+		# exceptions.AttributeError: 'tablecode' object has no attribute 'co_consts'
 		disableBinders()
 
 
