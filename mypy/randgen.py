@@ -41,8 +41,8 @@ class RandomFactory(object):
 		@return: a string of random bytes.
 		@rtype: C{str}
 		"""
-		# ugly speed-up for the most common case; feel free to change/remove
-		if nbytes is not 16:
+		# ugly speed-up for the most common nbytes; feel free to change it.
+		if nbytes not in (8, 16):
 			nbytes = ensureNonNegInt(nbytes)
 
 		if nbytes > len(self._buffer) - self._position:
