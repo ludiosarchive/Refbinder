@@ -15,7 +15,6 @@ def rreplace(string, needle, replacement):
 	else,
 		return the original L{string}
 	"""
-
 	location = string.rfind(needle)
 
 	if location == -1:
