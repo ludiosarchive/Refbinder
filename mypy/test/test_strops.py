@@ -1,4 +1,5 @@
-import unittest
+import sys
+from twisted.trial import unittest
 
 from mypy.testhelpers import ReallyEqualMixin
 from mypy import strops
@@ -144,3 +145,95 @@ class StringFragmentTests(unittest.TestCase, ReallyEqualMixin):
 		f1 = strops.StringFragment("helloworld", 0, 5)
 		self.assertEqual("lo", str(f1[-2:]))
 		self.assertEqual(2, len(f1[-2:]))
+
+
+
+class SlowStringCompareTests(unittest.TestCase):
+    """
+    Tests for L{strops.slowStringCompare}
+    """
+    def test_equal(self):
+        """
+        L{strops.slowStringCompare} returns C{True} for strings that are equal.
+        """
+        c = strops.slowStringCompare
+
+        self.assertTrue(c('', ''))
+        self.assertTrue(c('a', 'a'))
+        self.assertTrue(c('ab', 'ab'))
+        self.assertTrue(c(
+            'abcdefghijklmnopqrstuvwxyz', 'abcdefghijklmnopqrstuvwxyz'))
+        self.assertTrue(c('not alphabetical order', 'not alphabetical order'))
+        self.assertTrue(c('\x00\xff', '\x00\xff'))
+
+        rainbow = ''.join([chr(x) for x in xrange(256)])
+        self.assertTrue(c(rainbow, '' + rainbow))
+
+
+    def test_notEqual(self):
+        """
+        L{strops.slowStringCompare} returns C{False} for strings that are not
+        equal.
+        """
+        c = strops.slowStringCompare
+
+        self.assertFalse(c('ab', 'ba'))
+        self.assertFalse(c('', '\x00'))
+        self.assertFalse(c(' ', '\x00'))
+        self.assertFalse(c('\x00\xff', '\x00\xfe'))
+        self.assertFalse(c('\xff\x00', '\x00\xfe'))
+
+        rainbow = ''.join([chr(x) for x in xrange(256)])
+        self.assertFalse(c(rainbow, rainbow[::-1]))
+
+
+    def test_unicodeComparison(self):
+        """
+        If only one argument to L{strops.slowStringCompare} is unicode, the other
+        argument will be decoded using the default encoding before comparison
+        occurs; if this fails, the comparison will return C{False}.
+        Additionally, a C{DeprecationWarning} is raised if either argument is a
+        C{unicode} object.
+        """
+        def _compare(s1, s2):
+            if sys.version_info >= (2, 5):
+                expected = s1 == s2
+
+                ws = self.flushWarnings(
+                    [SlowStringCompareTests.test_unicodeComparison])
+                for w in ws:
+                    self.assertEquals(w['category'], UnicodeWarning)
+
+                result = strops.slowStringCompare(s1, s2)
+            else:
+                # When Python 2.4 cannot decode the non-unicode side of a string
+                # comparion, it raises UnicodeDecodeError instead of giving a
+                # UnicodeWarning and returning False.
+                try:
+                    expected = s1 == s2
+                except UnicodeDecodeError:
+                    # Use the exception class itself as a placeholder to represent
+                    # the raising of the exception.
+                    expected = UnicodeDecodeError
+
+                try:
+                    result = strops.slowStringCompare(s1, s2)
+                except UnicodeDecodeError:
+                    result = UnicodeDecodeError
+
+            self.assertEquals(result, expected)
+
+            [w] = self.flushWarnings(
+                [SlowStringCompareTests.test_unicodeComparison])
+            self.assertEquals(w['category'], DeprecationWarning)
+            self.assertEquals(
+                w['message'],
+                'Passing unicode strings to slowStringCompare is insecure')
+
+        _compare(u'test', 'test')
+        _compare('test', u'test')
+        _compare(u'test', u'test')
+
+        _compare(u'\xff', u'\xff')
+        _compare('\xff', u'\xff')
+        _compare(u'\xff', '\xff')

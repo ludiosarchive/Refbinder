@@ -3,6 +3,7 @@ Basic string operations that should have been in Python.
 """
 
 import sys
+import warnings
 
 _postImportVars = vars().keys()
 
@@ -109,6 +110,64 @@ class StringFragment(object):
 
 	def __ne__(self, other):
 		return True if type(self) != type(other) else self.toBuffer() != other.toBuffer()
+
+
+
+def slowStringCompare(s1, s2):
+	"""
+	Compare C{s1} and C{s2} for equality, but always take
+	the same amount of time when both strings are of the same length.
+	This is intended to stop U{timing attacks<http://rdist.root.org/2009/05/28/timing-attack-in-google-keyczar-library/>}.
+
+	This implementation should do what keyczar does::
+
+	  - http://code.google.com/p/keyczar/source/browse/trunk/python/src/keyczar/keys.py?r=471#352
+	  - http://rdist.root.org/2010/01/07/timing-independent-array-comparison/
+
+	@param s1: string to compare to s2
+	@type s1: C{str}
+
+	@param s2: string to compare to s1
+	@type s2: C{str}
+
+	@return: C{True} if strings are equivalent, else C{False}.
+	@rtype: C{bool}
+
+	@warning: if C{s1} and C{s2} are of unequal length, the comparison will take
+		less time.  An attacker may be able to guess how long the expected
+		string is.  To avoid this problem, compare only fixed-length hashes.
+	"""
+	if isinstance(s1, unicode) or isinstance(s2, unicode):
+		warnings.warn(
+			"Passing unicode strings to slowStringCompare is insecure",
+			DeprecationWarning,
+			stacklevel=2)
+
+	if isinstance(s1, unicode) and not isinstance(s2, unicode):
+		try:
+			s2 = unicode(s2)
+		except UnicodeDecodeError:
+			if sys.version_info < (2, 5):
+				# When Python 2.4 cannot decode the non-unicode side of a
+				# string comparion, it raises UnicodeDecodeError instead of
+				# giving a UnicodeWarning and returning False.  Match this
+				# behavior and re-raise the exception.
+				raise
+			return False
+	elif not isinstance(s1, unicode) and isinstance(s2, unicode):
+		try:
+			s1 = unicode(s1)
+		except UnicodeDecodeError:
+			if sys.version_info < (2, 5):
+				raise
+			return False
+
+	if len(s1) != len(s2):
+		return False
+	result = 0
+	for n in xrange(len(s1)):
+		result |= ord(s1[n]) ^ ord(s2[n])
+	return result == 0
 
 
 
