@@ -22,7 +22,7 @@ class FileCacheTests(unittest.TestCase):
 			# Pretend that the content is the filename
 			return filename
 
-		fc = filecache.FileCache(lambda: clock.rightNow, 1.0, makeFingerprint, getContent)
+		fc = filecache.FileCache(lambda: clock.seconds(), 1.0, makeFingerprint, getContent)
 		self.assertEqual(('hello world', True), fc.getContent('hello world'))
 		self.assertEqual([1, 1], counts)
 
@@ -54,7 +54,7 @@ class FileCacheTests(unittest.TestCase):
 
 	def test_withDefaults(self):
 		clock = Clock()
-		fc = filecache.FileCache(lambda: clock.rightNow, 0.01)
+		fc = filecache.FileCache(lambda: clock.seconds(), 0.01)
 		filename = self.mktemp()
 		FilePath(filename).setContent('aaaa')
 		self.assertEqual(('aaaa', True), fc.getContent(filename))
@@ -70,7 +70,7 @@ class FileCacheTests(unittest.TestCase):
 
 	def test_neverRecheck(self):
 		clock = Clock()
-		fc = filecache.FileCache(lambda: clock.rightNow, -1)
+		fc = filecache.FileCache(lambda: clock.seconds(), -1)
 		filename = self.mktemp()
 		FilePath(filename).setContent('aaaa')
 		self.assertEqual(('aaaa', True), fc.getContent(filename))
@@ -87,7 +87,7 @@ class FileCacheTests(unittest.TestCase):
 			return filename
 
 		clock = Clock()
-		fc = filecache.FileCache(lambda: clock.rightNow, -1,
+		fc = filecache.FileCache(lambda: clock.seconds(), -1,
 			fingerprintCallable=lambda x: x,
 			getContentCallable=getContent)
 
@@ -103,7 +103,7 @@ class FileCacheTests(unittest.TestCase):
 
 	def test_clearCacheListeners(self):
 		clock = Clock()
-		fc = filecache.FileCache(lambda: clock.rightNow, -1)
+		fc = filecache.FileCache(lambda: clock.seconds(), -1)
 		fc.clearCache()
 
 		def a():
