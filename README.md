@@ -1,5 +1,5 @@
-Overview
-========
+Mypy overview
+=============
 
 Mypy is a collection of Python utilities that are usable in a wide variety
 of applications.
@@ -9,7 +9,7 @@ Installation
 ============
 `python setup.py install`
 
-This installs the module `mypy`
+This installs the module `mypy`.
 
 
 Modules
@@ -19,7 +19,7 @@ __mypy.complainer__
 
 `complainImplicitUnicodeConversions(True)` will make Python complain
 about implicit unicode/str conversions.  This is a high-level interface
-for washort's ascii_with_complaints.
+for washort's `ascii_with_complaints`.
 
 __mypy.constant__
 
@@ -61,7 +61,7 @@ every time; it caches `bufferSize` bytes.
 
 __mypy.refbinder__
 
-Contains a high-level interface for mypy._refbinder, which is mostly
+Contains a high-level interface for `mypy._refbinder`, which is mostly
 Raymond Hettinger's "Decorator for BindingConstants at compile time"
 
 __mypy.strops__
@@ -91,12 +91,12 @@ Install Twisted, then run `trial mypy`
 TODO
 ====
 
-*	Consider making securedict not a dict, given that dict(aSecureDict)
-	does not work correctly in CPython.  Maybe use UserDict?
+*	Consider making securedict not a dict, given that `dict(aSecureDict)`
+	does not work correctly in CPython.  Maybe use `UserDict`?
 
-*	Add method to FileCache that yields every entry in the cache.
+*	Add method to `FileCache` that yields every entry in the cache.
 
-*	Fix or remove mypy.dictops.frozendict
+*	Fix or remove `mypy.dictops.frozendict`
 
 
 Code style notes
@@ -110,5 +110,3 @@ This package mostly follows the Divmod Coding Standard
 *	Use hard tabs only at the beginning of a line.
 
 *	Prefer to have lines <= 80 characters, but always less than 100.
-
-*	In docstrings, use epytext.
