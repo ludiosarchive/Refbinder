@@ -27,10 +27,6 @@ __mypy.constant__
 
 __mypy.dictops__
 
-`securedict` behaves almost exactly like `dict` but is (probably)
-safe against an algorithmic complexity attack where keys with colliding
-hashes are inserted into a dict.
-
 `consensualfrozendict` is a `dict` but blocks naive attempts to mutate
 it.
 
@@ -90,9 +86,6 @@ Install Twisted, then run `trial mypy`
 
 TODO
 ====
-
-*	Consider making securedict not a dict, given that `dict(aSecureDict)`
-	does not work correctly in CPython.  Maybe use `UserDict`?
 
 *	Add method to `FileCache` that yields every entry in the cache.
 

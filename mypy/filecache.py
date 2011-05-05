@@ -1,8 +1,6 @@
 import os
 import sys
 
-from mypy.dictops import securedict
-
 _postImportVars = vars().keys()
 
 
@@ -93,8 +91,10 @@ class FileCache(object):
 
 
 	def clearCache(self):
-		self._fingerprintCache = securedict()
-		self._contentCache = securedict()
+		# No need for securedict because FileCache is designed to store
+		# a limited set of resources not controlled by the user.
+		self._fingerprintCache = {}
+		self._contentCache = {}
 		# Copy to prevent re-entrancy problems.
 		listeners = self._clearCacheListeners[:]
 		for callable in listeners:
