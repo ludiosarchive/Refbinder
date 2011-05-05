@@ -1,7 +1,6 @@
 from twisted.trial import unittest
 
-from mypy.dictops import attrdict, consensualfrozendict, frozendict
-from mypy.testhelpers import ReallyEqualMixin
+from mypy.dictops import attrdict, consensualfrozendict
 
 
 
@@ -114,66 +113,3 @@ class ConsensualFrozenDictTests(_BaseFrozenDictTests, unittest.TestCase):
 		d = self.dtype(x=3)
 		dict.__init__(d, {'x': 4})
 		self.assertEqual(4, d['x'])
-
-
-
-class _DictReadingTests(object):
-	dtype = frozendict
-
-	def test_len(self):
-		self.assertEqual(0, len(self.dtype()))
-		self.assertEqual(1, len(self.dtype(x=3)))
-
-
-	def test_contains(self):
-		d = self.dtype(x=3)
-		self.assertTrue('x' in d)
-		self.assertFalse('y' in d)
-		self.assertFalse(3 in d)
-		self.assertFalse(('x', 3) in d)
-
-
-	def test_keys(self):
-		self.assertEqual(['x'], self.dtype(x=3).keys())
-		self.assertEqual([], self.dtype().keys())
-
-
-	def test_values(self):
-		self.assertEqual([3], self.dtype(x=3).values())
-		self.assertEqual([], self.dtype().values())
-
-
-	def test_items(self):
-		self.assertEqual([('x', 3)], self.dtype(x=3).items())
-		self.assertEqual([], self.dtype().items())
-
-
-	def test_iteration(self):
-		d = self.dtype(x=3)
-		found = []
-		for k in d:
-			found.append(k)
-		self.assertEqual(['x'], found)
-
-# TODO: complete tests
-
-
-
-class FrozenDictTests(_DictReadingTests, _BaseFrozenDictTests, unittest.TestCase):
-	"""
-	Tests for L{dictops.frozendict}
-	"""
-	dtype = frozendict
-
-	def test_copy(self):
-		d = self.dtype(x=3)
-		# .copy() returns a reference to the same object
-		self.assertIdentical(d, d.copy())
-
-
-
-class DictSanityCheckTests(_DictReadingTests, unittest.TestCase):
-	"""
-	Test that L{_DictReadingTests} works the same on python dicts.
-	"""
-	dtype = dict

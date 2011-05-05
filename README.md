@@ -89,8 +89,6 @@ TODO
 
 *	Add method to `FileCache` that yields every entry in the cache.
 
-*	Fix or remove `mypy.dictops.frozendict`
-
 
 Code style notes
 ================
