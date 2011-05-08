@@ -7,6 +7,7 @@ of applications.
 
 Installation
 ============
+
 `python setup.py install`
 
 This installs the module `mypy`.
