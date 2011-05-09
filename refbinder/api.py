@@ -46,7 +46,7 @@ def enableBinders():
 	"""
 	global _refbinder
 	try:
-		from mypy import _refbinder
+		from refbinder import _refbinder
 	except (ImportError, KeyError, AttributeError):
 		# 1) ImportError might be raised from a failed opcode.* import.
 		# 2) KeyError might be raised from a failed opmap['']

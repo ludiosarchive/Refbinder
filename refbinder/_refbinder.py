@@ -30,7 +30,7 @@ else:
 
 try:
 	_forcePrintDebug = bool(int(
-		os.environ['MYPY_REFBINDER_PRINT_DEBUG']))
+		os.environ['REFBINDER_PRINT_DEBUG']))
 except (KeyError, ValueError):
 	_forcePrintDebug = False
 
