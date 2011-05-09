@@ -8,7 +8,7 @@ setup(
 	name='Refbinder',
 	version=refbinder.__version__,
 	description=('Modified version of "Decorator for BindingConstants '
-		'at compile time" with a mass-binder')
+		'at compile time" with a mass-binder'),
 	url="https://github.com/ludios/Refbinder",
 	author="Ivan Kozik",
 	author_email="ivan@ludios.org",
@@ -17,6 +17,8 @@ setup(
 		'Development Status :: 4 - Beta',
 		'Operating System :: OS Independent',
 		'Intended Audience :: Developers',
+		'License :: OSI Approved :: MIT License',
+		'License :: OSI Approved :: Python Software Foundation License',
 	],
 	packages=['refbinder'],
 )
