@@ -1,7 +1,11 @@
+Note that Refbinder is mostly <http://code.activestate.com/recipes/277940-decorator-for-bindingconstants-at-compile-time/>,
+so the MIT license below applies to modifications.
+
+
 Refbinder license
 =================
 
-Copyright (c) 2009-2011 Ivan Kozik
+Copyright (c) 2010-2011 Ivan Kozik
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
