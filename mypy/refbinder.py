@@ -62,7 +62,7 @@ def areBindersEnabled():
 
 try:
 	_autoenable = bool(int(
-		os.environ['MYPY_REFBINDER_AUTOENABLE']))
+		os.environ['REFBINDER_AUTOENABLE']))
 except (KeyError, ValueError):
 	_autoenable = False
 

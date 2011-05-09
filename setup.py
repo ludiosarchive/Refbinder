@@ -2,24 +2,21 @@
 
 from distutils.core import setup
 
-import mypy
+import refbinder
 
 setup(
-	name='Mypy',
-	version=mypy.__version__,
-	description=("Python utilities: constant binder for performance, "
-		"file cache, faster urandom, StringFragment, Constant, "
-		"ReallyEqualMixin, and more."),
-	url="https://github.com/ludios/Mypy",
+	name='Refbinder',
+	version=refbinder.__version__,
+	description=('Modified version of "Decorator for BindingConstants '
+		'at compile time" with a mass-binder')
+	url="https://github.com/ludios/Refbinder",
 	author="Ivan Kozik",
 	author_email="ivan@ludios.org",
 	classifiers=[
 		'Programming Language :: Python :: 2',
-		'Development Status :: 3 - Alpha',
+		'Development Status :: 4 - Beta',
 		'Operating System :: OS Independent',
 		'Intended Audience :: Developers',
-		'License :: OSI Approved :: MIT License',
 	],
-	packages=['mypy', 'mypy.test'],
-	package_data={'mypy.test': ['images/*']},
+	packages=['refbinder'],
 )
